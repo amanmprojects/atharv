@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 44 20% 95%; /* Cream/off-white */
+    --foreground: 0 0% 10%; /* Almost black */
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+    --primary: 74 88% 58%; /* Acid Lime Green */
+    --primary-foreground: 0 0% 10%; /* Black text on lime */
+    --secondary: 40 10% 90%; /* Slight darker cream for secondary */
+    --secondary-foreground: 0 0% 10%;
+    --muted: 40 10% 90%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 74 88% 58%; /* Lime Green */
+    --accent-foreground: 0 0% 10%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 0%; /* Stark solid black borders */
+    --input: 0 0% 0%;
+    --ring: 74 88% 58%;
+    --radius: 0rem; /* Sharp, structured brutalism */
+    
+    --severity-high: 0 72% 51%;
+    --severity-medium: 38 92% 50%;
+    --severity-low: 48 89% 50%;
+    --source-custom: 204 70% 53%;
+    --source-llm: 271 54% 47%;
+  }
+
+  .dark {
+    --background: 0 0% 5%; /* Very dark deep grey/black */
+    --foreground: 44 20% 95%; /* Cream text */
+    --card: 0 0% 8%;
+    --card-foreground: 44 20% 95%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 44 20% 95%;
+    --primary: 74 88% 58%; /* Acid Lime Green */
+    --primary-foreground: 0 0% 10%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 44 20% 95%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 63%;
+    --accent: 74 88% 58%;
+    --accent-foreground: 0 0% 10%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 20%; /* Sharp grey border */
+    --input: 0 0% 20%;
+    --ring: 74 88% 58%;
+    
+    --severity-high: 0 72% 70%;
+    --severity-medium: 48 96% 61%;
+    --severity-low: 54 98% 64%;
+    --source-custom: 195 100% 64%;
+    --source-llm: 279 72% 69%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+}
+
+.highlight-high {
+  @apply bg-red-100 dark:bg-red-900/30 border-b-2 border-red-500;
+}
+
+.highlight-medium {
+  @apply bg-orange-100 dark:bg-orange-900/30 border-b-2 border-orange-500;
+}
+
+.highlight-low {
+  @apply bg-yellow-100 dark:bg-yellow-900/30 border-b-2 border-yellow-500;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  @apply bg-muted rounded;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/30 rounded hover:bg-muted-foreground/50;
+}
