@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Author Style Fingerprint Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "scholar-bg": "#E8E2DB",
+                        "scholar-sidebar": "#1A3263",
+                        "scholar-sidebar-hover": "#2a4a8b",
+                        "scholar-text": "#1A3263",
+                        "scholar-text-light": "#547792",
+                        "scholar-accent": "#FAB95B", // Gold
+                        "scholar-accent-light": "#fde6bd", 
+                        "scholar-secondary": "#547792", // Muted Blue
+                        "scholar-border": "#d1d5db",
+                        "scholar-card": "#ffffff",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.75rem",
+                        "xl": "1rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #E8E2DB; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #547792; 
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1A3263; 
+        }
+    </style>
+</head>
+<body class="bg-scholar-bg text-scholar-text min-h-screen flex overflow-hidden font-display">
+<aside class="hidden md:flex flex-col w-64 h-screen border-r border-scholar-sidebar/20 bg-scholar-sidebar shrink-0 sticky top-0 overflow-y-auto text-white">
+<div class="flex flex-col h-full p-4 justify-between">
+<div class="flex flex-col gap-8">
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-10 shrink-0 border border-white/20 shadow-sm" data-alt="User profile picture of a man" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDKnep1MaRmnXwH69VFNfZRkGAQN9qxsCIow2KtOKBR58kEpAGHCniEPGtQs3nhsgy8GEQWJEqz4s2KGVfztySoU-D96Y99HrW06T20l8VISibVO6nXmSOq39QK2lxt9VzxKRS9noYoJOmJmrJxNZUv_CCIuDo5HR9twYFfGUYNGNfNucgxv5GfCgUWh5Ono0-AigEreG1Q7K_xOcwvhZ8-Tq0vrSUOWjfQRwIAsq7s-gn-WHvmNP71Z_2WrOhw_SKXzMeONF68Grst");'></div>
+<div class="flex flex-col overflow-hidden">
+<h1 class="text-white text-sm font-semibold leading-tight truncate">Narrative AI</h1>
+<p class="text-white/60 text-xs font-medium leading-normal">Pro Plan</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-scholar-accent transition-colors">dashboard</span>
+<p class="text-sm font-medium">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-scholar-accent transition-colors">edit_note</span>
+<p class="text-sm font-medium">Editor</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-scholar-accent transition-colors">library_books</span>
+<p class="text-sm font-medium">Library</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-scholar-accent/20 text-white border border-scholar-accent/40" href="#">
+<span class="material-symbols-outlined text-scholar-accent">psychology</span>
+<p class="text-sm font-medium text-scholar-accent">Style Fingerprint</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:text-scholar-accent transition-colors">settings</span>
+<p class="text-sm font-medium">Settings</p>
+</a>
+</nav>
+</div>
+<button class="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg h-10 px-4 bg-scholar-accent hover:bg-scholar-accent/90 transition-colors text-scholar-sidebar text-sm font-bold shadow-lg shadow-black/20">
+<span class="material-symbols-outlined text-[20px]">add</span>
+<span class="truncate">New Project</span>
+</button>
+</div>
+</aside>
+<main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+<header class="flex items-center justify-between border-b border-scholar-border bg-scholar-bg/95 backdrop-blur-md px-6 py-4 z-10 sticky top-0">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-3 text-scholar-text">
+<div class="p-2 bg-scholar-sidebar/10 rounded-lg text-scholar-sidebar">
+<span class="material-symbols-outlined">fingerprint</span>
+</div>
+<div>
+<h2 class="text-scholar-text text-lg font-bold leading-tight">Style Fingerprint</h2>
+<p class="text-scholar-text-light text-xs">Analyzing "The Last Horizon" vs. Hemingway</p>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex items-center bg-white border border-scholar-border rounded-lg h-10 px-3 w-64 focus-within:border-scholar-sidebar/50 transition-colors">
+<span class="material-symbols-outlined text-scholar-text-light text-[20px]">search</span>
+<input class="bg-transparent border-none text-sm text-scholar-text placeholder-scholar-text-light/70 focus:ring-0 w-full ml-2" placeholder="Search analysis..." type="text"/>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center justify-center size-10 rounded-lg bg-white border border-scholar-border text-scholar-text-light hover:text-scholar-text hover:border-scholar-text-light/30 transition-all relative">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-scholar-accent rounded-full"></span>
+</button>
+<button class="flex items-center justify-center size-10 rounded-lg bg-white border border-scholar-border text-scholar-text-light hover:text-scholar-text hover:border-scholar-text-light/30 transition-all">
+<span class="material-symbols-outlined text-[20px]">help</span>
+</button>
+</div>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto p-6 md:p-8 space-y-8 bg-scholar-bg">
+<div class="flex flex-wrap items-end justify-between gap-4">
+<div class="flex flex-col gap-1">
+<h1 class="text-3xl font-bold text-scholar-text tracking-tight">Author DNA</h1>
+<p class="text-scholar-text-light">Analyze your unique writing voice against literary archetypes.</p>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex items-center bg-white border border-scholar-border rounded-lg p-1">
+<button class="px-3 py-1.5 rounded text-xs font-medium bg-scholar-sidebar text-white shadow-sm">Last 30 Days</button>
+<button class="px-3 py-1.5 rounded text-xs font-medium text-scholar-text-light hover:text-scholar-text">All Time</button>
+</div>
+<button class="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-gray-50 border border-scholar-border rounded-lg text-scholar-text text-sm font-medium transition-all">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                        Export Report
+                    </button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<div class="bg-scholar-card border border-scholar-border rounded-xl p-5 hover:border-scholar-accent transition-colors group shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-scholar-bg rounded-lg text-scholar-text-light group-hover:text-scholar-accent transition-colors shadow-sm">
+<span class="material-symbols-outlined">straighten</span>
+</div>
+<span class="flex items-center text-xs font-medium text-emerald-700 bg-emerald-100 px-2 py-1 rounded">
+<span class="material-symbols-outlined text-[14px] mr-1">trending_up</span>
+                            +2%
+                        </span>
+</div>
+<p class="text-scholar-text-light text-sm font-medium">Avg Sentence Length</p>
+<h3 class="text-2xl font-bold text-scholar-text mt-1">14.5 <span class="text-lg text-scholar-text-light font-normal">words</span></h3>
+</div>
+<div class="bg-scholar-card border border-scholar-border rounded-xl p-5 hover:border-scholar-accent transition-colors group shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-scholar-bg rounded-lg text-scholar-text-light group-hover:text-scholar-accent transition-colors shadow-sm">
+<span class="material-symbols-outlined">record_voice_over</span>
+</div>
+<span class="flex items-center text-xs font-medium text-emerald-700 bg-emerald-100 px-2 py-1 rounded">
+<span class="material-symbols-outlined text-[14px] mr-1">check_circle</span>
+                            Good
+                        </span>
+</div>
+<p class="text-scholar-text-light text-sm font-medium">Passive Voice</p>
+<h3 class="text-2xl font-bold text-scholar-text mt-1">3.2% <span class="text-lg text-scholar-text-light font-normal">usage</span></h3>
+</div>
+<div class="bg-scholar-card border border-scholar-border rounded-xl p-5 hover:border-scholar-accent transition-colors group shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-scholar-bg rounded-lg text-scholar-text-light group-hover:text-scholar-accent transition-colors shadow-sm">
+<span class="material-symbols-outlined">school</span>
+</div>
+<span class="flex items-center text-xs font-medium text-scholar-text-light bg-scholar-bg px-2 py-1 rounded border border-scholar-border">
+                            Steady
+                        </span>
+</div>
+<p class="text-scholar-text-light text-sm font-medium">Vocabulary Score</p>
+<h3 class="text-2xl font-bold text-scholar-text mt-1">Grade 12</h3>
+</div>
+<div class="bg-scholar-card border border-scholar-border rounded-xl p-5 hover:border-scholar-accent transition-colors group shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-scholar-bg rounded-lg text-scholar-text-light group-hover:text-scholar-accent transition-colors shadow-sm">
+<span class="material-symbols-outlined">hotel_class</span>
+</div>
+<span class="flex items-center text-xs font-medium text-emerald-700 bg-emerald-100 px-2 py-1 rounded">
+                            92%
+                        </span>
+</div>
+<p class="text-scholar-text-light text-sm font-medium">Style Consistency</p>
+<h3 class="text-2xl font-bold text-scholar-text mt-1">High</h3>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="lg:col-span-2 bg-scholar-card border border-scholar-border rounded-xl p-6 flex flex-col shadow-md">
+<div class="flex items-center justify-between mb-6">
+<div>
+<h3 class="text-lg font-bold text-scholar-text">Aggregate Fingerprint</h3>
+<p class="text-sm text-scholar-text-light">Comparing your style against selected archetype</p>
+</div>
+<div class="flex items-center gap-2 bg-scholar-bg rounded-lg p-1 border border-scholar-border">
+<span class="text-xs text-scholar-text-light font-medium pl-2">VS</span>
+<select class="bg-transparent border-none text-sm text-scholar-text focus:ring-0 py-1 pl-1 pr-8 font-medium cursor-pointer">
+<option>Hemingway</option>
+<option>Tolkien</option>
+<option>Stephen King</option>
+<option>User Baseline</option>
+</select>
+</div>
+</div>
+<div class="relative flex-1 min-h-[350px] flex items-center justify-center p-4">
+<div class="absolute top-0 right-0 flex flex-col gap-2 text-xs">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-scholar-accent"></span>
+<span class="text-scholar-text">Current Project</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-scholar-secondary/60"></span>
+<span class="text-scholar-text-light">Hemingway</span>
+</div>
+</div>
+<svg class="w-full h-full max-w-[400px] overflow-visible" viewBox="0 0 100 100">
+<circle cx="50" cy="50" fill="none" r="40" stroke="#d1d5db" stroke-width="0.5"></circle>
+<circle cx="50" cy="50" fill="none" r="30" stroke="#d1d5db" stroke-width="0.5"></circle>
+<circle cx="50" cy="50" fill="none" r="20" stroke="#d1d5db" stroke-width="0.5"></circle>
+<circle cx="50" cy="50" fill="none" r="10" stroke="#d1d5db" stroke-width="0.5"></circle>
+<line stroke="#d1d5db" stroke-width="0.5" x1="50" x2="50" y1="10" y2="90"></line>
+<line stroke="#d1d5db" stroke-width="0.5" x1="15.36" x2="84.64" y1="30" y2="70"></line>
+<line stroke="#d1d5db" stroke-width="0.5" x1="15.36" x2="84.64" y1="70" y2="30"></line>
+<path d="M50 20 L75 40 L65 75 L35 75 L25 40 Z" fill="rgba(84, 119, 146, 0.1)" stroke="#547792" stroke-dasharray="2 1" stroke-width="1.5"></path>
+<path class="drop-shadow-sm" d="M50 15 L80 35 L70 80 L30 80 L20 35 Z" fill="rgba(250, 185, 91, 0.15)" stroke="#FAB95B" stroke-width="2.5"></path>
+<circle cx="50" cy="15" fill="#FAB95B" r="2" stroke="#ffffff" stroke-width="0.5"></circle>
+<circle cx="80" cy="35" fill="#FAB95B" r="2" stroke="#ffffff" stroke-width="0.5"></circle>
+<circle cx="70" cy="80" fill="#FAB95B" r="2" stroke="#ffffff" stroke-width="0.5"></circle>
+<circle cx="30" cy="80" fill="#FAB95B" r="2" stroke="#ffffff" stroke-width="0.5"></circle>
+<circle cx="20" cy="35" fill="#FAB95B" r="2" stroke="#ffffff" stroke-width="0.5"></circle>
+<text fill="#547792" font-size="3" font-weight="600" text-anchor="middle" x="50" y="5">Formality</text>
+<text fill="#547792" font-size="3" font-weight="600" text-anchor="middle" x="90" y="30">Sentiment</text>
+<text fill="#547792" font-size="3" font-weight="600" text-anchor="middle" x="80" y="85">Complexity</text>
+<text fill="#547792" font-size="3" font-weight="600" text-anchor="middle" x="20" y="85">Pacing</text>
+<text fill="#547792" font-size="3" font-weight="600" text-anchor="middle" x="10" y="30">Imagery</text>
+</svg>
+</div>
+</div>
+<div class="bg-scholar-card border border-scholar-border rounded-xl p-6 flex flex-col h-full shadow-md">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-scholar-accent">auto_fix_high</span>
+<h3 class="text-lg font-bold text-scholar-text">AI Insights</h3>
+</div>
+<div class="flex flex-col gap-4 overflow-y-auto pr-1">
+<div class="p-4 rounded-lg bg-scholar-bg/30 border border-scholar-border hover:border-scholar-accent transition-colors cursor-pointer group shadow-sm">
+<div class="flex justify-between items-start mb-2">
+<h4 class="text-sm font-semibold text-scholar-text group-hover:text-scholar-accent transition-colors">Sentence Variation</h4>
+<span class="bg-red-100 text-red-600 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase border border-red-200">High Priority</span>
+</div>
+<p class="text-xs text-scholar-text-light leading-relaxed">Your sentences average 20% longer than your baseline. Consider breaking up the long paragraphs in Chapter 4.</p>
+<div class="mt-3 flex items-center gap-2 text-scholar-accent text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+<span>View suggestions</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</div>
+</div>
+<div class="p-4 rounded-lg bg-scholar-bg/30 border border-scholar-border hover:border-scholar-accent transition-colors cursor-pointer group shadow-sm">
+<div class="flex justify-between items-start mb-2">
+<h4 class="text-sm font-semibold text-scholar-text group-hover:text-scholar-accent transition-colors">Adverb Usage</h4>
+<span class="bg-amber-100 text-amber-600 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase border border-amber-200">Medium</span>
+</div>
+<p class="text-xs text-scholar-text-light leading-relaxed">Adverb frequency is higher than the "Thriller" archetype. Try using stronger verbs instead.</p>
+</div>
+<div class="p-4 rounded-lg bg-scholar-bg/30 border border-scholar-border hover:border-scholar-accent transition-colors cursor-pointer group shadow-sm">
+<div class="flex justify-between items-start mb-2">
+<h4 class="text-sm font-semibold text-scholar-text group-hover:text-scholar-accent transition-colors">Tone Consistency</h4>
+<span class="bg-emerald-100 text-emerald-600 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase border border-emerald-200">Low</span>
+</div>
+<p class="text-xs text-scholar-text-light leading-relaxed">Dialogue in Scene 3 feels overly formal compared to the character's established voice.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-scholar-card border border-scholar-border rounded-xl p-6 mb-8 shadow-md">
+<div class="flex flex-wrap items-center justify-between mb-6 gap-4">
+<div>
+<h3 class="text-lg font-bold text-scholar-text">Style Drift Over Time</h3>
+<p class="text-sm text-scholar-text-light">Tracking changes across recent chapters</p>
+</div>
+<div class="flex gap-2">
+<button class="px-3 py-1.5 rounded-lg border border-scholar-secondary text-scholar-secondary text-xs font-medium">Sentiment</button>
+<button class="px-3 py-1.5 rounded-lg border border-scholar-border bg-scholar-bg hover:bg-white text-scholar-text-light text-xs font-medium transition-colors">Pacing</button>
+<button class="px-3 py-1.5 rounded-lg border border-scholar-border bg-scholar-bg hover:bg-white text-scholar-text-light text-xs font-medium transition-colors">Formality</button>
+</div>
+</div>
+<div class="h-[250px] w-full relative">
+<div class="absolute inset-0 flex flex-col justify-between text-xs text-scholar-text-light/50">
+<div class="border-b border-scholar-border w-full h-full flex items-end pb-1"><span>0%</span></div>
+<div class="border-b border-scholar-border w-full h-full flex items-end pb-1"><span>25%</span></div>
+<div class="border-b border-scholar-border w-full h-full flex items-end pb-1"><span>50%</span></div>
+<div class="border-b border-scholar-border w-full h-full flex items-end pb-1"><span>75%</span></div>
+<div class="w-full h-full flex items-end pb-1"><span>100%</span></div>
+</div>
+<svg class="absolute inset-0 w-full h-full overflow-visible" preserveAspectRatio="none">
+<defs>
+<linearGradient id="lineGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#547792" stop-opacity="0.2"></stop>
+<stop offset="100%" stop-color="#547792" stop-opacity="0"></stop>
+</linearGradient>
+</defs>
+<path d="M0,150 Q200,100 400,120 T800,80 T1200,140 V250 H0 Z" fill="url(#lineGradient)"></path>
+<path d="M0,150 Q200,100 400,120 T800,80 T1200,140" fill="none" stroke="#547792" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></path>
+<circle cx="0" cy="150" fill="#ffffff" r="4" stroke="#547792" stroke-width="2"></circle>
+<circle cx="200" cy="118" fill="#ffffff" r="4" stroke="#547792" stroke-width="2"></circle>
+<circle cx="400" cy="120" fill="#ffffff" r="4" stroke="#547792" stroke-width="2"></circle>
+<circle cx="600" cy="95" fill="#ffffff" r="4" stroke="#547792" stroke-width="2"></circle>
+<circle cx="800" cy="80" fill="#ffffff" r="4" stroke="#547792" stroke-width="2"></circle>
+<circle cx="1000" cy="110" fill="#ffffff" r="4" stroke="#547792" stroke-width="2"></circle>
+<circle cx="1200" cy="140" fill="#ffffff" r="4" stroke="#547792" stroke-width="2"></circle>
+</svg>
+</div>
+<div class="flex justify-between mt-2 text-xs text-scholar-text-light font-medium px-1">
+<span>Ch 1</span>
+<span>Ch 2</span>
+<span>Ch 3</span>
+<span>Ch 4</span>
+<span>Ch 5</span>
+<span>Ch 6</span>
+<span>Current</span>
+</div>
+</div>
+</div>
+</main>
+</body></html>

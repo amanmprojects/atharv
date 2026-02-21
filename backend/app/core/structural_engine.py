@@ -1,8 +1,10 @@
 import re
 import math
-from typing import List, Dict, Tuple, Optional
+import time
+from typing import Any, List, Dict, Tuple, Optional
 from collections import Counter
 from dataclasses import dataclass
+from app.core.config import settings
 
 @dataclass
 class StructuralIssue:
@@ -235,12 +237,23 @@ class TransitionGapDetector:
             'secondly', 'additionally', 'similarly', 'conversely', 'instead',
             'thus', 'hence', 'accordingly', 'besides', 'also', 'yet', 'still',
         }
+        self.similarity_provider = settings.TRANSITION_SIMILARITY_PROVIDER.lower()
+        self.embedding_model = settings.OPENAI_EMBEDDING_MODEL
+        self.embedding_task_type = settings.OPENAI_EMBEDDING_INPUT_TYPE
+        self._embedding_cache: Dict[str, List[float]] = {}
+        self._embedding_cache_max_size = 2048
+        self._embedding_client: Optional[Any] = None
+        self._embeddings_enabled = False
+        self._initialize_embedding_provider()
     
     def detect_gaps(self, paragraphs: List[str]) -> List[StructuralIssue]:
         issues = []
         
         if len(paragraphs) < 2:
             return issues
+
+        boundaries: List[Tuple[str, str]] = []
+        transitions: List[bool] = []
         
         for i in range(len(paragraphs) - 1):
             para_a = paragraphs[i]
@@ -248,10 +261,14 @@ class TransitionGapDetector:
             
             last_sentence = self._get_last_sentence(para_a)
             first_sentence = self._get_first_sentence(para_b)
-            
-            similarity = self._simple_similarity(last_sentence, first_sentence)
-            
-            has_transition = self._has_transition_word(first_sentence)
+
+            boundaries.append((last_sentence, first_sentence))
+            transitions.append(self._has_transition_word(first_sentence))
+
+        similarities = self._calculate_similarities(boundaries)
+        
+        for i, similarity in enumerate(similarities):
+            has_transition = transitions[i]
             
             if similarity < self.threshold and not has_transition:
                 severity = "high" if similarity < 0.2 else "medium"
@@ -261,19 +278,35 @@ class TransitionGapDetector:
                     location={"between_paragraphs": [i, i + 1]},
                     severity=severity,
                     score=round(similarity, 2),
-                    explanation=f"Semantic similarity between end of paragraph {i} and start of paragraph {i+1} is only {similarity:.2f} — readers may perceive an abrupt topic shift.",
+                    explanation=f"Semantic similarity between end of paragraph {i + 1} and start of paragraph {i + 2} is only {similarity:.2f} — readers may perceive an abrupt topic shift.",
                     suggestion=f"Consider adding a transitional sentence linking the two paragraphs."
                 ))
         
         return issues
     
     def _get_last_sentence(self, text: str) -> str:
-        sentences = re.split(r'[.!?]+', text)
-        return sentences[-1].strip() if sentences else ""
+        sentences = self._extract_sentences(text)
+        return sentences[-1] if sentences else ""
     
     def _get_first_sentence(self, text: str) -> str:
-        sentences = re.split(r'[.!?]+', text)
-        return sentences[0].strip() if sentences else ""
+        sentences = self._extract_sentences(text)
+        return sentences[0] if sentences else ""
+
+    def _extract_sentences(self, text: str) -> List[str]:
+        # Keep only non-empty segments so trailing punctuation does not
+        # produce empty "last sentence" values.
+        return [s.strip() for s in re.split(r'[.!?]+', text) if s.strip()]
+
+    def _calculate_similarities(self, boundaries: List[Tuple[str, str]]) -> List[float]:
+        if not boundaries:
+            return []
+
+        if self._embeddings_enabled:
+            embedding_sims = self._embedding_similarities(boundaries)
+            if embedding_sims is not None:
+                return embedding_sims
+
+        return [self._simple_similarity(a, b) for a, b in boundaries]
     
     def _simple_similarity(self, text_a: str, text_b: str) -> float:
         words_a = set(re.findall(r'\b\w+\b', text_a.lower()))
@@ -295,6 +328,119 @@ class TransitionGapDetector:
     def _has_transition_word(self, text: str) -> bool:
         words = set(re.findall(r'\b\w+\b', text.lower()))
         return bool(words & self.transition_words)
+
+    def _initialize_embedding_provider(self) -> None:
+        if self.similarity_provider not in {"openai", "gemini"}:
+            return
+
+        api_key = settings.OPENAI_COMPAT_API_KEY or settings.GEMINI_API_KEY
+        if not api_key or not settings.OPENAI_COMPAT_BASE_URL:
+            return
+
+        try:
+            from openai import OpenAI
+
+            self._embedding_client = OpenAI(
+                api_key=api_key,
+                base_url=settings.OPENAI_COMPAT_BASE_URL,
+            )
+            self._embeddings_enabled = True
+        except Exception:
+            self._embeddings_enabled = False
+            self._embedding_client = None
+
+    def _embedding_similarities(
+        self, boundaries: List[Tuple[str, str]]
+    ) -> Optional[List[float]]:
+        if self._embedding_client is None:
+            return None
+
+        uncached_sentences: List[str] = []
+        seen = set()
+        for text_a, text_b in boundaries:
+            for text in (text_a, text_b):
+                if text and text not in self._embedding_cache and text not in seen:
+                    uncached_sentences.append(text)
+                    seen.add(text)
+
+        if uncached_sentences:
+            try:
+                response = self._embed_with_retries(
+                    uncached_sentences,
+                )
+                vectors = [item.embedding for item in response.data]
+
+                if len(vectors) != len(uncached_sentences):
+                    return None
+
+                for text, vector in zip(uncached_sentences, vectors):
+                    self._embedding_cache[text] = vector
+
+                if len(self._embedding_cache) > self._embedding_cache_max_size:
+                    self._embedding_cache.clear()
+            except Exception:
+                # Fail open to lexical similarity when embedding calls are unavailable.
+                self._embeddings_enabled = False
+                return None
+
+        similarities: List[float] = []
+        for text_a, text_b in boundaries:
+            vector_a = self._embedding_cache.get(text_a)
+            vector_b = self._embedding_cache.get(text_b)
+
+            if vector_a is None or vector_b is None:
+                similarities.append(self._simple_similarity(text_a, text_b))
+                continue
+
+            similarities.append(self._cosine_similarity(vector_a, vector_b))
+
+        return similarities
+
+    def _embed_with_retries(
+        self,
+        texts: List[str],
+        retries: int = 3,
+        backoff_seconds: float = 2.0,
+    ) -> Any:
+        if self._embedding_client is None:
+            raise RuntimeError("Embedding client is not initialized.")
+
+        for attempt in range(retries):
+            try:
+                return self._embedding_client.embeddings.create(
+                    model=self.embedding_model,
+                    input=texts,
+                    extra_body={"input_type": self.embedding_task_type},
+                )
+            except Exception:
+                if attempt == retries - 1:
+                    raise
+                wait_time = backoff_seconds * (2 ** attempt)
+                time.sleep(wait_time)
+
+    def _cosine_similarity(self, vector_a: List[float], vector_b: List[float]) -> float:
+        if not vector_a or not vector_b:
+            return 0.0
+
+        length = min(len(vector_a), len(vector_b))
+        if length == 0:
+            return 0.0
+
+        dot = 0.0
+        norm_a = 0.0
+        norm_b = 0.0
+        for i in range(length):
+            a = float(vector_a[i])
+            b = float(vector_b[i])
+            dot += a * b
+            norm_a += a * a
+            norm_b += b * b
+
+        if norm_a == 0.0 or norm_b == 0.0:
+            return 0.0
+
+        cosine = dot / (math.sqrt(norm_a) * math.sqrt(norm_b))
+        return max(0.0, min(1.0, cosine))
 
 class RedundancyDetector:
     def __init__(self, threshold: float = 0.85):

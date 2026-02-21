@@ -394,15 +394,15 @@ export default function Editor() {
           )}
         </div>
 
-        <div className="w-[420px] border-l-4 border-foreground bg-card flex flex-col">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+        <div className="w-[420px] border-l-4 border-foreground bg-card flex flex-col min-h-0 overflow-hidden">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 min-h-0 flex flex-col">
             <TabsList className="mx-4 mt-4 bg-background border-2 border-foreground shadow-[2px_2px_0_0_hsl(var(--foreground))]">
               <TabsTrigger value="suggestions" className="text-xs font-black uppercase data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Suggestions</TabsTrigger>
               <TabsTrigger value="narrative" className="text-xs font-black uppercase data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Narrative</TabsTrigger>
               <TabsTrigger value="style" className="text-xs font-black uppercase data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Style</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="suggestions" className="flex-1 overflow-auto p-4 scrollbar-thin">
+            <TabsContent value="suggestions" className="flex-1 min-h-0 overflow-auto p-4 scrollbar-thin">
               {analysisResult ? (
                 <>
                   <div className="mb-4 p-3 bg-muted border-2 border-foreground/10">
@@ -435,7 +435,7 @@ export default function Editor() {
               )}
             </TabsContent>
 
-            <TabsContent value="narrative" className="flex-1 overflow-auto p-4 scrollbar-thin">
+            <TabsContent value="narrative" className="flex-1 min-h-0 overflow-auto p-4 scrollbar-thin">
               {analysisResult ? (
                 <>
                   <div className="mb-4">
@@ -499,7 +499,7 @@ export default function Editor() {
               )}
             </TabsContent>
 
-            <TabsContent value="style" className="flex-1 overflow-auto p-4 scrollbar-thin">
+            <TabsContent value="style" className="flex-1 min-h-0 overflow-auto p-4 scrollbar-thin">
               {analysisResult ? (
                 <>
                   {analysisResult.style_fingerprint && (

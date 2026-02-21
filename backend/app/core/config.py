@@ -17,10 +17,16 @@ class Settings(BaseSettings):
 
     LLM_PROVIDER: str = "gemini"
     GEMINI_API_KEY: str = ""
+    GOOGLE_NL_API_KEY: str = ""
     GEMINI_MODEL: str = "gemini-1.5-flash"
+    OPENAI_COMPAT_API_KEY: str = ""
+    OPENAI_COMPAT_BASE_URL: str = ""
+    OPENAI_EMBEDDING_MODEL: str = "gemini-embedding-001"
+    OPENAI_EMBEDDING_INPUT_TYPE: str = "SEMANTIC_SIMILARITY"
 
     LLM_MAX_CALLS_PER_DOC: int = 10
     SIMILARITY_THRESHOLD: float = 0.85
+    TRANSITION_SIMILARITY_PROVIDER: str = "lexical"
 
     # Firebase / GCP
     GOOGLE_CLOUD_PROJECT: str = ""

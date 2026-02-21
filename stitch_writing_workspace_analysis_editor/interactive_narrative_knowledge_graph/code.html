@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Knowledge Graph (Scholarly Palette)</title>
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "paper": "#E8E2DB",
+                        "ink": "#1A3263",
+                        "accent": "#FAB95B",
+                        "paper-dark": "#DCD5CC", 
+                        "ink-light": "#547792", 
+                        "surface-paper": "#F3F0EB",
+                        "border-paper": "#C0B8AD",
+                        "sidebar-bg": "#1A3263",
+                        "sidebar-text": "#FFFFFF",
+                        "sidebar-accent": "#FAB95B",
+                        "sidebar-border": "#2A4578"
+                    },
+                    fontFamily: {
+                        "display": ["Merriweather", "serif"],
+                        "sans": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                    boxShadow: {
+                        "paper": "0 4px 6px -1px rgba(26, 50, 99, 0.1), 0 2px 4px -1px rgba(26, 50, 99, 0.06)",
+                        "ink": "0 0 0 1px #1A3263",
+                    }
+                },
+            },
+        }
+    </script>
+<style>.node-base {
+            box-shadow: 0 2px 8px rgba(26, 50, 99, 0.15);
+            transition: all 0.2s ease;
+        }
+        .node-base:hover {
+            box-shadow: 0 4px 12px rgba(26, 50, 99, 0.25);
+            transform: scale(1.05);
+        }.bg-grid-pattern {
+            background-image: 
+                linear-gradient(to right, #C0B8AD 1px, transparent 1px),
+                linear-gradient(to bottom, #C0B8AD 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.4;
+        }.shape-diamond {
+            transform: rotate(45deg);
+        }.paper-texture {
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-paper text-ink font-sans overflow-hidden h-screen flex flex-col selection:bg-accent selection:text-ink">
+<header class="flex-none flex items-center justify-between whitespace-nowrap border-b border-solid border-border-paper px-6 py-3 bg-surface-paper z-20 shadow-sm relative">
+<div class="absolute inset-0 paper-texture z-0 opacity-50"></div>
+<div class="flex items-center gap-8 relative z-10">
+<div class="flex items-center gap-3 text-ink">
+<div class="size-8 bg-ink rounded-sm flex items-center justify-center text-white">
+<span class="material-symbols-outlined">auto_stories</span>
+</div>
+<h2 class="text-ink text-lg font-bold font-display leading-tight tracking-tight">Narrative Intelligence</h2>
+</div>
+<div class="hidden md:flex items-center gap-6">
+<a class="text-ink-light hover:text-ink transition-colors text-sm font-medium leading-normal font-display" href="#">Projects</a>
+<a class="text-ink text-sm font-bold leading-normal border-b-2 border-accent pb-4 -mb-4 font-display" href="#">Knowledge Graph</a>
+<a class="text-ink-light hover:text-ink transition-colors text-sm font-medium leading-normal font-display" href="#">Manuscript</a>
+<a class="text-ink-light hover:text-ink transition-colors text-sm font-medium leading-normal font-display" href="#">Analysis</a>
+</div>
+</div>
+<div class="flex items-center gap-4 relative z-10">
+<label class="hidden lg:flex flex-col min-w-40 !h-9 max-w-64 group">
+<div class="flex w-full flex-1 items-stretch rounded-md h-full ring-1 ring-border-paper bg-white overflow-hidden group-focus-within:ring-accent group-focus-within:ring-2 transition-shadow shadow-sm">
+<div class="text-ink-light flex border-none bg-transparent items-center justify-center pl-3">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden text-ink focus:outline-0 focus:ring-0 border-none bg-transparent focus:border-none h-full placeholder:text-ink-light px-3 text-sm font-normal leading-normal font-display" placeholder="Search archives..." value=""/>
+</div>
+</label>
+<div class="flex gap-2">
+<button class="flex size-9 cursor-pointer items-center justify-center rounded-md border border-border-paper bg-white text-ink hover:bg-paper-dark transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+</button>
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-9 ring-2 ring-border-paper ml-2 shadow-sm" data-alt="User profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC6i4S0rpGUvo1WvxgQ00LTJK4Tdsfyoc8miGNnDvKcBV2BzD9_Xm7uw-PNQ9xGDjTOLKxzBiBeMG-XLnyi2BBrXKgOHySd6-jDjUcz8pPH4mdu6VyAMPKjFCULeCOKaSTy3O8ACwDTKXEegfsaojzITmG2Lz71KR281_N7CT1PHYE7cHVS8Wf6VYIYsQUoYVIVBsL_mgYvXah1yse8ZO3paDDjF82OMOF_RxQB7mRChyOj3gJOfsGFlDnGOmF_qKMspvx2WoB2oW6k");'></div>
+</div>
+</div>
+</header>
+<main class="flex-1 flex relative overflow-hidden bg-paper">
+<div class="flex-1 relative overflow-hidden cursor-move group bg-paper">
+<div class="absolute inset-0 paper-texture z-0 pointer-events-none opacity-60"></div>
+<div class="absolute inset-0 bg-grid-pattern pointer-events-none"></div>
+<div class="absolute top-4 left-4 flex flex-col gap-2 z-10">
+<div class="bg-surface-paper/95 backdrop-blur-sm border border-border-paper p-4 rounded-md shadow-paper">
+<h3 class="text-xs font-bold text-ink-light uppercase mb-3 tracking-wider font-display border-b border-border-paper pb-1">Legend</h3>
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-ink border border-ink-light"></div>
+<span class="text-xs text-ink font-serif font-medium">Character</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-sm bg-white border border-ink"></div>
+<span class="text-xs text-ink font-serif font-medium">Location</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-2.5 h-2.5 rotate-45 bg-accent border border-accent/50 ml-0.5"></div>
+<span class="text-xs text-ink font-serif font-medium ml-0.5">Event</span>
+</div>
+</div>
+</div>
+</div>
+<div class="absolute bottom-4 left-4 flex flex-col gap-1 z-10">
+<div class="bg-surface-paper/95 backdrop-blur-sm border border-border-paper rounded-md shadow-paper flex flex-col p-1">
+<button class="size-9 flex items-center justify-center text-ink-light hover:text-ink hover:bg-paper-dark rounded transition-colors" title="Zoom In">
+<span class="material-symbols-outlined">add</span>
+</button>
+<button class="size-9 flex items-center justify-center text-ink-light hover:text-ink hover:bg-paper-dark rounded transition-colors" title="Zoom Out">
+<span class="material-symbols-outlined">remove</span>
+</button>
+<div class="h-px bg-border-paper my-1 mx-2"></div>
+<button class="size-9 flex items-center justify-center text-ink-light hover:text-ink hover:bg-paper-dark rounded transition-colors" title="Fit to Screen">
+<span class="material-symbols-outlined">center_focus_strong</span>
+</button>
+</div>
+</div>
+<div class="absolute inset-0 flex items-center justify-center transform scale-100 origin-center transition-transform duration-300">
+<svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 0;">
+<line stroke="#1A3263" stroke-width="2" x1="50%" x2="65%" y1="50%" y2="40%"></line>
+<line stroke="#1A3263" stroke-dasharray="6,4" stroke-width="2" x1="50%" x2="35%" y1="50%" y2="60%"></line>
+<line stroke="#1A3263" stroke-width="2" x1="50%" x2="55%" y1="50%" y2="70%"></line>
+<line stroke="#FAB95B" stroke-width="2" x1="65%" x2="75%" y1="40%" y2="35%"></line>
+</svg>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex flex-col items-center">
+<div class="w-20 h-20 rounded-full bg-surface-paper border-4 double border-ink flex items-center justify-center node-base shadow-[0_4px_20px_rgba(250,185,91,0.2)] cursor-pointer hover:scale-110 transition-transform relative group/node ring-4 ring-paper">
+<div class="w-16 h-16 rounded-full bg-cover bg-center grayscale contrast-125 sepia-[.3]" data-alt="Portrait of a young woman with determined eyes" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDGMuqx4Z38ZaiyTHgNd6EcRjBQMX1g-SEGzAFzf3F8vZDHoP3vEiDI6tzbeMY5cbu5j7ZuJJthcGVlHCbzagfmlrCap3Zlu0wDx8Q909Qjyj_bPyyUnd1gdN1TZR07KUB4gNHFcicrasBlA4z6kMMzwaeA4MPx1fsdAeZGnB52xHKdT4dEA3LcwQkkRipDvbAwblQFAsQ6i_0bnEbtsXUQfnbxLgTwouJGGtwWckpCe8AIF-yTa7o1qWMCuUgH5MJePQopqfZ35YMe');"></div>
+<div class="absolute -top-1 -right-1 w-5 h-5 bg-accent rounded-full border-2 border-surface-paper flex items-center justify-center">
+<span class="material-symbols-outlined text-[10px] text-white">star</span>
+</div>
+</div>
+<span class="mt-3 text-base font-bold text-ink bg-surface-paper/80 px-3 py-1 rounded-sm backdrop-blur-sm border border-border-paper shadow-sm font-display">Elara Vance</span>
+</div>
+<div class="absolute top-[40%] left-[65%] -translate-x-1/2 -translate-y-1/2 z-0 flex flex-col items-center opacity-90 hover:opacity-100 transition-opacity">
+<div class="w-14 h-14 rounded-full bg-surface-paper border-2 border-ink flex items-center justify-center cursor-pointer hover:scale-110 transition-transform node-base">
+<span class="text-ink font-serif font-bold text-xl">K</span>
+</div>
+<span class="mt-2 text-sm font-medium text-ink-light font-display">Kael</span>
+<span class="absolute -bottom-6 text-[10px] text-ink font-sans font-bold tracking-wider uppercase bg-paper-dark/50 px-1.5 py-0.5 rounded border border-ink/10">Ally</span>
+</div>
+<div class="absolute top-[60%] left-[35%] -translate-x-1/2 -translate-y-1/2 z-0 flex flex-col items-center opacity-90 hover:opacity-100 transition-opacity">
+<div class="w-16 h-16 rounded-full bg-ink border-2 border-ink flex items-center justify-center cursor-pointer hover:scale-110 transition-transform node-base shadow-lg">
+<span class="text-white font-serif font-bold text-xl">B</span>
+</div>
+<span class="mt-2 text-sm font-medium text-ink-light font-display">The Baron</span>
+<span class="absolute -bottom-6 text-[10px] text-red-700 font-sans font-bold tracking-wider uppercase bg-red-100 px-1.5 py-0.5 rounded border border-red-200">Antagonist</span>
+</div>
+<div class="absolute top-[70%] left-[55%] -translate-x-1/2 -translate-y-1/2 z-0 flex flex-col items-center opacity-90 hover:opacity-100 transition-opacity">
+<div class="w-14 h-14 rounded-sm bg-white border-2 border-ink flex items-center justify-center cursor-pointer hover:scale-110 transition-transform node-base">
+<span class="material-symbols-outlined text-ink text-2xl">castle</span>
+</div>
+<span class="mt-2 text-sm font-medium text-ink-light font-display">Ironhold Castle</span>
+</div>
+<div class="absolute top-[35%] left-[75%] -translate-x-1/2 -translate-y-1/2 z-0 flex flex-col items-center opacity-90 hover:opacity-100 transition-opacity">
+<div class="w-12 h-12 bg-accent border-2 border-white flex items-center justify-center cursor-pointer hover:scale-110 transition-transform shape-diamond node-base shadow-md">
+<span class="material-symbols-outlined text-white -rotate-45 text-lg font-bold">flash_on</span>
+</div>
+<span class="mt-4 text-sm font-medium text-ink-light font-display">The Betrayal</span>
+</div>
+</div>
+<div class="absolute top-1/2 left-[58%] bg-surface-paper border border-border-paper rounded-md shadow-paper p-1 z-20 hidden">
+<button class="w-full text-left px-3 py-1.5 text-sm text-ink-light hover:text-ink hover:bg-paper-dark rounded flex items-center gap-2 font-display">
+<span class="material-symbols-outlined text-base">visibility_off</span> Hide Node
+                </button>
+<button class="w-full text-left px-3 py-1.5 text-sm text-ink-light hover:text-ink hover:bg-paper-dark rounded flex items-center gap-2 font-display">
+<span class="material-symbols-outlined text-base">center_focus_weak</span> Focus
+                </button>
+</div>
+</div>
+<aside class="w-[380px] bg-sidebar-bg border-l border-sidebar-border flex flex-col z-30 shadow-2xl relative text-sidebar-text">
+<div class="absolute inset-0 paper-texture z-0 opacity-10 pointer-events-none"></div>
+<div class="relative z-10 p-6 border-b border-sidebar-border">
+<div class="flex items-start justify-between mb-4">
+<div class="flex items-center gap-2 text-xs font-bold font-sans tracking-wide text-sidebar-text bg-white/10 px-2 py-1 rounded border border-white/20">
+<span class="w-2 h-2 rounded-full bg-accent"></span>
+                        PROTAGONIST
+                    </div>
+<div class="flex gap-1">
+<button class="text-white/70 hover:text-white transition-colors p-1 rounded hover:bg-white/10">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+<button class="text-white/70 hover:text-white transition-colors p-1 rounded hover:bg-white/10">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+</div>
+<h1 class="text-3xl font-bold text-white mb-1 font-display">Elara Vance</h1>
+<p class="text-sidebar-accent text-sm italic font-display">Level 4 • Human Ranger</p>
+</div>
+<div class="relative z-10 flex-1 overflow-y-auto bg-black/10">
+<div class="p-6 border-b border-sidebar-border grid grid-cols-2 gap-4">
+<div class="bg-white/5 p-3 rounded-md border border-white/10 shadow-sm">
+<span class="text-xs text-white/60 uppercase tracking-wider block mb-1 font-bold">Status</span>
+<span class="text-sm font-medium text-white flex items-center gap-1 font-display">
+<span class="w-1.5 h-1.5 rounded-full bg-green-400"></span> Active
+                        </span>
+</div>
+<div class="bg-white/5 p-3 rounded-md border border-white/10 shadow-sm">
+<span class="text-xs text-white/60 uppercase tracking-wider block mb-1 font-bold">Archetype</span>
+<span class="text-sm font-medium text-white font-display">Reluctant Hero</span>
+</div>
+<div class="col-span-2 bg-white/5 p-3 rounded-md border border-white/10 shadow-sm">
+<span class="text-xs text-white/60 uppercase tracking-wider block mb-1 font-bold">Motivation</span>
+<span class="text-sm font-medium text-white font-display">Revenge for Kael's imprisonment</span>
+</div>
+</div>
+<div class="p-6 border-b border-sidebar-border">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-sm font-bold text-sidebar-accent uppercase tracking-wide font-sans">Relationships</h3>
+<button class="text-xs text-white/80 font-bold hover:text-white hover:underline font-sans">View All</button>
+</div>
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between group cursor-pointer p-2 -mx-2 rounded hover:bg-white/5 transition-colors border border-transparent hover:border-white/10">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-white flex items-center justify-center text-ink text-sm font-bold font-serif">K</div>
+<div>
+<p class="text-sm font-bold text-white font-display">Kael</p>
+<p class="text-xs text-white/60 font-sans">Brother</p>
+</div>
+</div>
+<span class="text-xs font-bold text-white bg-white/20 px-2 py-0.5 rounded border border-white/10">Ally</span>
+</div>
+<div class="flex items-center justify-between group cursor-pointer p-2 -mx-2 rounded hover:bg-white/5 transition-colors border border-transparent hover:border-white/10">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-transparent border border-white/40 flex items-center justify-center text-white text-sm font-bold font-serif">B</div>
+<div>
+<p class="text-sm font-bold text-white font-display">The Baron</p>
+<p class="text-xs text-white/60 font-sans">Oppressor</p>
+</div>
+</div>
+<span class="text-xs font-bold text-red-200 bg-red-900/50 px-2 py-0.5 rounded border border-red-800">Enemy</span>
+</div>
+<div class="flex items-center justify-between group cursor-pointer p-2 -mx-2 rounded hover:bg-white/5 transition-colors border border-transparent hover:border-white/10">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-sm bg-white/10 text-white border border-white/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-lg">castle</span>
+</div>
+<div>
+<p class="text-sm font-bold text-white font-display">Ironhold</p>
+<p class="text-xs text-white/60 font-sans">Home Base</p>
+</div>
+</div>
+<span class="text-xs font-bold text-white bg-white/20 px-2 py-0.5 rounded border border-white/10">Location</span>
+</div>
+</div>
+</div>
+<div class="p-6">
+<h3 class="text-sm font-bold text-sidebar-accent uppercase tracking-wide mb-4 font-sans">Recent Mentions</h3>
+<div class="relative pl-4 border-l-2 border-sidebar-border space-y-6">
+<div class="relative">
+<div class="absolute -left-[21px] top-1 w-3 h-3 bg-accent rounded-full border-2 border-sidebar-bg shadow-sm"></div>
+<p class="text-xs text-white/60 mb-1 font-bold font-sans">Chapter 3 • The Call</p>
+<div class="bg-white/5 p-4 rounded-md border border-white/10 text-sm text-white/90 leading-relaxed font-display shadow-sm">
+                                "<span class="text-white font-bold bg-accent/30 px-1 rounded-sm">Elara</span> drew her sword, the cold steel reflecting the moonlight. She knew she couldn't turn back now."
+                            </div>
+<a class="inline-flex items-center gap-1 text-xs text-sidebar-accent font-bold mt-2 hover:underline font-sans" href="#">
+                                Go to paragraph <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</a>
+</div>
+<div class="relative">
+<div class="absolute -left-[21px] top-1 w-3 h-3 bg-white/50 rounded-full border-2 border-sidebar-bg shadow-sm"></div>
+<p class="text-xs text-white/60 mb-1 font-bold font-sans">Chapter 1 • Origins</p>
+<div class="bg-white/5 p-4 rounded-md border border-white/10 text-sm text-white/90 leading-relaxed font-display shadow-sm">
+                                "The wind howled outside the tavern. <span class="text-white font-bold bg-accent/30 px-1 rounded-sm">Elara</span> sat in the corner, nursing a tankard of ale, eyes fixed on the door."
+                            </div>
+<a class="inline-flex items-center gap-1 text-xs text-sidebar-accent font-bold mt-2 hover:underline font-sans" href="#">
+                                Go to paragraph <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class="relative z-10 p-4 border-t border-sidebar-border bg-sidebar-bg">
+<button class="w-full flex items-center justify-center gap-2 bg-sidebar-accent hover:bg-yellow-400 text-ink font-bold py-3 px-4 rounded-md transition-colors text-sm shadow-md font-sans tracking-wide">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+                    Add Connection
+                </button>
+</div>
+</aside>
+</main>
+</body></html>

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NIP - Narrative Intelligence Platform</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1a3460", // Deep Navy from config
+                        "primary-hover": "#132545",
+                        "accent": "#FAB95B", // Golden Amber
+                        "secondary-blue": "#547792", // Secondary Blue
+                        "parchment": "#E8E2DB", // Background
+                        "parchment-light": "#F2EFE9", // Lighter parchment for cards
+                        "ink": "#121417", // Dark text
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        "scholarly": "0 4px 20px -2px rgba(26, 52, 96, 0.1)",
+                        "scholarly-hover": "0 10px 25px -5px rgba(26, 52, 96, 0.15)",
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #E8E2DB; /* Fallback */
+        }
+        
+        /* Subtle paper grain texture overlay */
+        .paper-texture {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 50;
+        }
+
+        /* Custom Scrollbar for scholarly feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #E8E2DB; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #547792; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1a3460; 
+        }
+    </style>
+</head>
+<body class="bg-parchment text-ink antialiased selection:bg-accent selection:text-primary relative overflow-x-hidden">
+<div class="paper-texture"></div>
+<!-- Navigation -->
+<nav class="sticky top-0 z-40 w-full border-b border-primary/10 bg-parchment/90 backdrop-blur-md">
+<div class="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+<div class="flex items-center gap-3 text-primary">
+<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white">
+<span class="material-symbols-outlined text-2xl">history_edu</span>
+</div>
+<span class="text-xl font-black tracking-tight text-primary">NIP</span>
+</div>
+<div class="hidden md:flex items-center gap-10">
+<a class="text-sm font-medium text-primary hover:text-secondary-blue transition-colors" href="#">Features</a>
+<a class="text-sm font-medium text-primary hover:text-secondary-blue transition-colors" href="#">Methodology</a>
+<a class="text-sm font-medium text-primary hover:text-secondary-blue transition-colors" href="#">Pricing</a>
+</div>
+<div class="flex items-center gap-4">
+<a class="hidden text-sm font-bold text-primary hover:underline sm:block" href="#">Log In</a>
+<button class="flex items-center justify-center rounded-lg bg-primary px-6 py-2.5 text-sm font-bold text-white transition-all hover:bg-primary-hover hover:shadow-lg active:scale-95">
+<span>Get Started</span>
+</button>
+</div>
+</div>
+</nav>
+<!-- Hero Section -->
+<section class="relative pt-16 pb-20 lg:pt-24 lg:pb-32 overflow-hidden">
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+<div class="grid gap-12 lg:grid-cols-2 lg:gap-8 items-center">
+<!-- Left Content -->
+<div class="max-w-2xl">
+<div class="inline-flex items-center gap-2 rounded-full border border-primary/10 bg-white/50 px-4 py-1.5 backdrop-blur-sm mb-6">
+<span class="flex h-2 w-2 rounded-full bg-accent"></span>
+<span class="text-xs font-bold uppercase tracking-wide text-primary">v2.0 Now Available</span>
+</div>
+<h1 class="font-display text-4xl font-black leading-[1.1] tracking-tight text-primary sm:text-5xl lg:text-6xl mb-6">
+                        Elevate Your Narrative with <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary-blue">Scholarly Intelligence.</span>
+</h1>
+<p class="text-lg leading-relaxed text-slate-700 mb-8 max-w-lg">
+                        The AI-powered workbench for sophisticated writing, deep analysis, and precise editing. Designed for academics, journalists, and serious authors.
+                    </p>
+<div class="flex flex-col sm:flex-row gap-4">
+<button class="flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-base font-bold text-primary transition-all hover:bg-[#ffc978] hover:shadow-scholarly active:scale-95">
+<span>Start Free Trial</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+<button class="flex items-center justify-center gap-2 rounded-lg border-2 border-primary/10 bg-transparent px-8 py-4 text-base font-bold text-primary transition-all hover:border-primary/30 hover:bg-primary/5">
+<span class="material-symbols-outlined">play_circle</span>
+<span>View Demo</span>
+</button>
+</div>
+<div class="mt-10 flex items-center gap-4 text-sm text-slate-600">
+<div class="flex -space-x-2">
+<img alt="User portrait" class="inline-block h-8 w-8 rounded-full ring-2 ring-parchment object-cover" data-alt="Portrait of a female researcher" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6HxvCfK6HmK9kz7LDJ5DMv8u7oTmXS6lj632tHftwXRjDKcXLXvVmX-uod8RLhbnWMcSgYHkTyxsdoWWsRow3JikauFdxCRtMJcUi8sUKm4A161gIoCBld2-LPYNjD-XZ6I_6dC8of74YNyDqL8FMRMNwP1NqbGHAlVV3y5e5N38Rrs6I1XIEHhJxKa1p3uOiAXIFDEbxTJvlvyandkSvrYBQ_vJZgbu18niAQX6LOeXPXZwxZsEtj74bm9UMyxAYfjX5Dt-5Hynj"/>
+<img alt="User portrait" class="inline-block h-8 w-8 rounded-full ring-2 ring-parchment object-cover" data-alt="Portrait of a male professor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAsuK1tu7wv6Q3qpyw1j_Pto9yjbVtPQFDQTepa_NvoxuGoZXwlL2ppF-aUhBYiof-E461vyc4mPXkeGWY05D7T-HC2ouynk1TLoKffZ8jGDD6JQ-shrBjgsrQx6y_lzoZmFp2_PuJ_iOXbvVzp2JFCNe4PXRZahQGBeQxGLuR-h0O8nPG_oRApOt4ar0SG295nxMlsOMW-pUWJMlLIfw6fhVa4cMgT44OV7GCM1WyXg6j_bfdhBcHanHKNmk9IH_9LIdBH_VGaBtOY"/>
+<img alt="User portrait" class="inline-block h-8 w-8 rounded-full ring-2 ring-parchment object-cover" data-alt="Portrait of a male author" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAyrlzmh3LDu2QT59qSRHk_bxt6lLgsc7f-Lyq_rKmpimXbWX-BBzmporbWjoX_hRIb-qaxA4lOKnj3XnvewPCUfpXJKXtW3Q6UFaHsAIMfxceMHomC_N_Y1FsfCuibFY5nvDV73Ar6af7_DDg8gzAQJiN6CPsNqOwKNRftj9XtGz8w6vZ1HZVmzi5PQWrMTGRLFw3Cn6o2PTSEaCzfOX6MY0I_lO1GjNBaWjyOLdQQwNDpFKQLc_uHTIbnWBnHyHeAXRBXQ74fjSEu"/>
+</div>
+<p>Trusted by <span class="font-bold text-primary">10,000+</span> scholars &amp; writers.</p>
+</div>
+</div>
+<!-- Right Content: Dashboard Preview -->
+<div class="relative lg:ml-10 perspective-1000">
+<!-- Decorative Elements -->
+<div class="absolute -top-20 -right-20 h-72 w-72 rounded-full bg-accent/20 blur-3xl"></div>
+<div class="absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-secondary-blue/20 blur-3xl"></div>
+<!-- Dashboard Mockup -->
+<div class="relative rounded-xl bg-white shadow-2xl border border-primary/10 overflow-hidden transform rotate-y-6 hover:rotate-y-0 transition-transform duration-700 ease-out">
+<!-- Window Chrome -->
+<div class="flex items-center gap-2 bg-slate-50 border-b border-slate-200 px-4 py-3">
+<div class="flex gap-1.5">
+<div class="h-3 w-3 rounded-full bg-red-400"></div>
+<div class="h-3 w-3 rounded-full bg-yellow-400"></div>
+<div class="h-3 w-3 rounded-full bg-green-400"></div>
+</div>
+<div class="mx-auto text-xs font-medium text-slate-400">NIP Workbench - Analysis Mode</div>
+</div>
+<!-- App Content -->
+<div class="flex h-[400px]">
+<!-- Sidebar -->
+<div class="w-16 flex-none bg-primary flex flex-col items-center py-4 gap-6">
+<div class="text-white/80 hover:text-white cursor-pointer"><span class="material-symbols-outlined">edit_note</span></div>
+<div class="text-white/80 hover:text-white cursor-pointer"><span class="material-symbols-outlined">analytics</span></div>
+<div class="text-white/80 hover:text-white cursor-pointer"><span class="material-symbols-outlined">library_books</span></div>
+<div class="mt-auto text-white/50"><span class="material-symbols-outlined">settings</span></div>
+</div>
+<!-- Main Area -->
+<div class="flex-1 bg-white p-6 flex gap-6">
+<div class="flex-1 space-y-4">
+<div class="h-4 w-3/4 rounded bg-slate-100"></div>
+<div class="h-4 w-full rounded bg-slate-100"></div>
+<div class="h-4 w-5/6 rounded bg-slate-100"></div>
+<div class="h-4 w-full rounded bg-slate-100"></div>
+<div class="flex gap-2 my-4">
+<span class="px-2 py-0.5 rounded bg-blue-50 text-blue-600 text-xs font-medium border border-blue-100">Active Voice</span>
+<span class="px-2 py-0.5 rounded bg-green-50 text-green-600 text-xs font-medium border border-green-100">Concise</span>
+</div>
+<div class="h-4 w-full rounded bg-slate-100"></div>
+<div class="h-4 w-4/5 rounded bg-slate-100"></div>
+</div>
+<!-- Analysis Panel -->
+<div class="w-48 bg-slate-50 rounded border border-slate-100 p-3 space-y-3">
+<div class="text-xs font-bold text-slate-400 uppercase">Analysis</div>
+<div class="p-2 bg-white rounded shadow-sm border border-slate-100">
+<div class="text-xs text-slate-500 mb-1">Complexity Score</div>
+<div class="text-xl font-bold text-primary">88/100</div>
+</div>
+<div class="p-2 bg-white rounded shadow-sm border border-slate-100">
+<div class="text-xs text-slate-500 mb-1">Tone</div>
+<div class="text-sm font-semibold text-secondary-blue">Academic</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Social Proof Strip -->
+<section class="border-y border-primary/5 bg-white/40 py-10">
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+<p class="mb-6 text-center text-sm font-semibold uppercase tracking-wider text-slate-500">Trusted by researchers at leading institutions</p>
+<div class="flex flex-wrap items-center justify-center gap-x-12 gap-y-8 opacity-70 grayscale transition-all duration-500 hover:opacity-100 hover:grayscale-0">
+<!-- Logos using text for simplicity in this constrained environment, normally would be SVGs -->
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-3xl">school</span>
+<span class="text-lg font-bold font-serif text-slate-700">HARVARD</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-3xl">account_balance</span>
+<span class="text-lg font-bold font-serif text-slate-700">STANFORD</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-3xl">science</span>
+<span class="text-lg font-bold font-serif text-slate-700">MIT LABS</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-3xl">menu_book</span>
+<span class="text-lg font-bold font-serif text-slate-700">OXFORD</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Features Section -->
+<section class="py-20 lg:py-32">
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+<div class="mb-16 max-w-3xl">
+<h2 class="font-display text-3xl font-black tracking-tight text-primary sm:text-4xl">
+                    Sophisticated Tools for Serious Writers
+                </h2>
+<p class="mt-4 text-lg text-slate-600">
+                    Unlock the power of AI-driven analysis designed specifically for academic and professional standards. Move beyond simple grammar checks.
+                </p>
+</div>
+<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+<!-- Feature 1 -->
+<div class="group relative overflow-hidden rounded-xl bg-parchment-light border border-primary/10 p-8 transition-all hover:shadow-scholarly-hover hover:border-primary/20">
+<div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-white text-secondary-blue shadow-sm">
+<span class="material-symbols-outlined text-2xl">psychology</span>
+</div>
+<h3 class="mb-2 text-xl font-bold text-primary">Contextual Awareness</h3>
+<p class="text-slate-600 leading-relaxed">
+                        AI that understands nuance and adapts to specific subject matter expertise, ensuring technical accuracy is maintained.
+                    </p>
+<div class="absolute bottom-0 left-0 h-1 w-0 bg-accent transition-all duration-300 group-hover:w-full"></div>
+</div>
+<!-- Feature 2 -->
+<div class="group relative overflow-hidden rounded-xl bg-parchment-light border border-primary/10 p-8 transition-all hover:shadow-scholarly-hover hover:border-primary/20">
+<div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-white text-secondary-blue shadow-sm">
+<span class="material-symbols-outlined text-2xl">format_quote</span>
+</div>
+<h3 class="mb-2 text-xl font-bold text-primary">Citation Engine</h3>
+<p class="text-slate-600 leading-relaxed">
+                        Automated formatting for academic standards including APA, MLA, and Chicago styles. Never miss a reference again.
+                    </p>
+<div class="absolute bottom-0 left-0 h-1 w-0 bg-accent transition-all duration-300 group-hover:w-full"></div>
+</div>
+<!-- Feature 3 -->
+<div class="group relative overflow-hidden rounded-xl bg-parchment-light border border-primary/10 p-8 transition-all hover:shadow-scholarly-hover hover:border-primary/20">
+<div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-white text-secondary-blue shadow-sm">
+<span class="material-symbols-outlined text-2xl">tune</span>
+</div>
+<h3 class="mb-2 text-xl font-bold text-primary">Style Calibration</h3>
+<p class="text-slate-600 leading-relaxed">
+                        Switch seamlessly between Journalistic, Academic, and Creative tones with one click. Calibrate your voice instantly.
+                    </p>
+<div class="absolute bottom-0 left-0 h-1 w-0 bg-accent transition-all duration-300 group-hover:w-full"></div>
+</div>
+<!-- Feature 4 -->
+<div class="group relative overflow-hidden rounded-xl bg-parchment-light border border-primary/10 p-8 transition-all hover:shadow-scholarly-hover hover:border-primary/20">
+<div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-white text-secondary-blue shadow-sm">
+<span class="material-symbols-outlined text-2xl">travel_explore</span>
+</div>
+<h3 class="mb-2 text-xl font-bold text-primary">Deep Research</h3>
+<p class="text-slate-600 leading-relaxed">
+                        Integrated semantic search connects your writing to verify claims against a database of peer-reviewed journals.
+                    </p>
+<div class="absolute bottom-0 left-0 h-1 w-0 bg-accent transition-all duration-300 group-hover:w-full"></div>
+</div>
+<!-- Feature 5 -->
+<div class="group relative overflow-hidden rounded-xl bg-parchment-light border border-primary/10 p-8 transition-all hover:shadow-scholarly-hover hover:border-primary/20">
+<div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-white text-secondary-blue shadow-sm">
+<span class="material-symbols-outlined text-2xl">difference</span>
+</div>
+<h3 class="mb-2 text-xl font-bold text-primary">Plagiarism Check</h3>
+<p class="text-slate-600 leading-relaxed">
+                        Enterprise-grade similarity detection ensures your work is original and properly attributed before publication.
+                    </p>
+<div class="absolute bottom-0 left-0 h-1 w-0 bg-accent transition-all duration-300 group-hover:w-full"></div>
+</div>
+<!-- Feature 6 -->
+<div class="group relative overflow-hidden rounded-xl bg-parchment-light border border-primary/10 p-8 transition-all hover:shadow-scholarly-hover hover:border-primary/20">
+<div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-white text-secondary-blue shadow-sm">
+<span class="material-symbols-outlined text-2xl">groups</span>
+</div>
+<h3 class="mb-2 text-xl font-bold text-primary">Collaboration</h3>
+<p class="text-slate-600 leading-relaxed">
+                        Real-time editing with peers or mentors. Leave structured feedback and track changes with granular permissions.
+                    </p>
+<div class="absolute bottom-0 left-0 h-1 w-0 bg-accent transition-all duration-300 group-hover:w-full"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Interactive Section -->
+<section class="bg-primary py-20 text-white relative overflow-hidden">
+<!-- Background Pattern -->
+<div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#547792 1px, transparent 1px); background-size: 32px 32px;"></div>
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
+<div class="grid gap-12 lg:grid-cols-2 lg:items-center">
+<div>
+<h2 class="font-display text-3xl font-black tracking-tight sm:text-4xl mb-6">
+                        Before &amp; After:<br/>See the Clarity Enhancement
+                    </h2>
+<p class="text-blue-100 text-lg mb-8 max-w-md">
+                        Our algorithms don't just fix grammar; they restructure arguments for maximum impact and logical flow.
+                    </p>
+<div class="flex gap-4">
+<div class="flex flex-col gap-1">
+<span class="text-3xl font-bold text-accent">3x</span>
+<span class="text-sm text-blue-200">Faster Editing</span>
+</div>
+<div class="h-12 w-px bg-blue-400/30"></div>
+<div class="flex flex-col gap-1">
+<span class="text-3xl font-bold text-accent">99%</span>
+<span class="text-sm text-blue-200">Citation Accuracy</span>
+</div>
+</div>
+</div>
+<div class="rounded-xl bg-white text-slate-800 shadow-2xl overflow-hidden">
+<div class="flex border-b border-slate-100">
+<button class="flex-1 py-3 text-sm font-semibold bg-slate-50 text-slate-500 border-r border-slate-100">Original Draft</button>
+<button class="flex-1 py-3 text-sm font-bold bg-white text-primary border-b-2 border-accent">NIP Enhanced</button>
+</div>
+<div class="p-6">
+<div class="flex items-start gap-4 mb-4">
+<div class="mt-1 h-6 w-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<div>
+<h4 class="text-sm font-bold text-slate-900">Improved Readability</h4>
+<p class="text-sm text-slate-500">Sentence structure simplified without losing meaning.</p>
+</div>
+</div>
+<div class="space-y-2 font-serif text-lg leading-relaxed text-slate-700">
+<p class="bg-green-50/50 p-2 rounded border-l-4 border-green-400">
+                                "The study demonstrates a significant correlation between cognitive load and narrative complexity, suggesting that simplified structures enhance retention."
+                            </p>
+</div>
+<div class="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center">
+<span class="text-xs font-semibold text-slate-400 uppercase">Impact Score</span>
+<div class="flex items-center gap-2">
+<div class="h-2 w-24 bg-slate-100 rounded-full overflow-hidden">
+<div class="h-full bg-green-500 w-[92%]"></div>
+</div>
+<span class="text-sm font-bold text-green-600">92/100</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Large CTA Footer -->
+<section class="py-24 relative overflow-hidden">
+<div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8 relative z-10">
+<h2 class="font-display text-4xl font-black tracking-tight text-primary sm:text-5xl mb-6">
+                Join the next generation of thinkers.
+            </h2>
+<p class="text-xl text-slate-600 mb-10 max-w-2xl mx-auto">
+                Start your journey towards clearer, more impactful writing today. No credit card required for the 14-day trial.
+            </p>
+<div class="flex flex-col sm:flex-row justify-center gap-4">
+<button class="flex items-center justify-center gap-2 rounded-lg bg-primary px-8 py-4 text-lg font-bold text-white transition-all hover:bg-primary-hover hover:shadow-xl hover:-translate-y-1">
+<span>Start Free Trial</span>
+</button>
+<button class="flex items-center justify-center gap-2 rounded-lg bg-white px-8 py-4 text-lg font-bold text-primary border border-primary/20 transition-all hover:bg-slate-50">
+<span>Contact Sales</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Footer -->
+<footer class="bg-primary text-white pt-16 pb-8 border-t border-white/10">
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+<div class="grid gap-12 md:grid-cols-4 mb-12">
+<div class="col-span-1 md:col-span-2">
+<div class="flex items-center gap-2 mb-4">
+<div class="flex h-8 w-8 items-center justify-center rounded bg-white/10 text-white">
+<span class="material-symbols-outlined text-xl">history_edu</span>
+</div>
+<span class="text-xl font-black tracking-tight">NIP</span>
+</div>
+<p class="text-blue-200 max-w-sm mb-6">
+                        Empowering the world's leading minds to write with precision, clarity, and authority.
+                    </p>
+<div class="flex gap-4">
+<a class="text-blue-200 hover:text-white transition-colors" href="#"><span class="material-symbols-outlined">mail</span></a>
+<a class="text-blue-200 hover:text-white transition-colors" href="#"><span class="material-symbols-outlined">public</span></a>
+</div>
+</div>
+<div>
+<h3 class="font-bold text-lg mb-4">Platform</h3>
+<ul class="space-y-3 text-blue-200">
+<li><a class="hover:text-white hover:underline decoration-accent underline-offset-4 transition-all" href="#">Features</a></li>
+<li><a class="hover:text-white hover:underline decoration-accent underline-offset-4 transition-all" href="#">Pricing</a></li>
+<li><a class="hover:text-white hover:underline decoration-accent underline-offset-4 transition-all" href="#">Enterprise</a></li>
+<li><a class="hover:text-white hover:underline decoration-accent underline-offset-4 transition-all" href="#">Changelog</a></li>
+</ul>
+</div>
+<div>
+<h3 class="font-bold text-lg mb-4">Company</h3>
+<ul class="space-y-3 text-blue-200">
+<li><a class="hover:text-white hover:underline decoration-accent underline-offset-4 transition-all" href="#">About Us</a></li>
+<li><a class="hover:text-white hover:underline decoration-accent underline-offset-4 transition-all" href="#">Careers</a></li>
+<li><a class="hover:text-white hover:underline decoration-accent underline-offset-4 transition-all" href="#">Blog</a></li>
+<li><a class="hover:text-white hover:underline decoration-accent underline-offset-4 transition-all" href="#">Contact</a></li>
+</ul>
+</div>
+</div>
+<div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-blue-300">
+<p>© 2023 Narrative Intelligence Platform. All rights reserved.</p>
+<div class="flex gap-6">
+<a class="hover:text-white" href="#">Privacy Policy</a>
+<a class="hover:text-white" href="#">Terms of Service</a>
+</div>
+</div>
+</div>
+</footer>
+</body></html>

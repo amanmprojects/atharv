@@ -47,6 +47,7 @@ class CharacterTracker:
         ]
     
     def extract_characters(self, paragraphs: List[str]) -> Dict[str, Character]:
+        self.characters = {}
         for para_idx, para in enumerate(paragraphs):
             self._extract_from_paragraph(para, para_idx)
         
@@ -69,13 +70,18 @@ class CharacterTracker:
                     self._add_character(name, para_idx)
         
         capitalized = re.findall(r'\b([A-Z][a-z]{2,})\b', text)
-        common_words = {'The', 'This', 'That', 'There', 'Here', 'When', 'Where', 'What', 'Why', 'How',
-                       'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday',
-                       'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
-                       'September', 'October', 'November', 'December', 'English', 'French', 'German'}
+        common_words = {
+            "the", "this", "that", "there", "here", "when", "where", "what", "why", "how",
+            "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday",
+            "january", "february", "march", "april", "may", "june", "july", "august",
+            "september", "october", "november", "december", "english", "french", "german",
+            "one", "two", "three", "then", "through", "after", "before", "during",
+            "however", "therefore", "meanwhile", "suddenly", "finally",
+        }
         
         for name in capitalized:
-            if name not in common_words and name not in self.pronouns:
+            name_lower = name.lower()
+            if name_lower not in common_words and name_lower not in self.pronouns:
                 self._add_character_mention(name, para_idx)
     
     def _add_character(self, name: str, para_idx: int, alias: str = None):
@@ -100,6 +106,12 @@ class CharacterTracker:
                 if name in c.aliases:
                     c.mentions.append({"paragraph": para_idx})
                     break
+        else:
+            self.characters[name] = Character(
+                name=name,
+                first_mention_paragraph=para_idx,
+                mentions=[{"paragraph": para_idx}],
+            )
     
     def _resolve_aliases(self):
         alias_map = {}
@@ -125,6 +137,7 @@ class TimelineTracker:
         ]
     
     def extract_timeline(self, paragraphs: List[str], characters: Dict[str, Character]) -> List[Event]:
+        self.events = []
         position = 0
         
         for para_idx, para in enumerate(paragraphs):

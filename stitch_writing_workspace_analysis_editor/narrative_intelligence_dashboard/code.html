@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Narrative Intelligence Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#FAB95B",
+                        "sidebar": "#1A3263",
+                        "background-main": "#E8E2DB", 
+                        "surface-card": "#FFFFFF",
+                        "text-main": "#1A3263",
+                        "text-muted": "#547792",
+                        "accent-blue": "#547792"
+                    },
+                    fontFamily: {
+                        "sans": ["Inter", "sans-serif"],
+                        "serif": ["Merriweather", "serif"],
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #E8E2DB;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #B0B7C3;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #547792;
+        }
+    </style>
+</head>
+<body class="bg-[#E8E2DB] text-[#1A3263] antialiased overflow-hidden">
+<div class="flex h-screen w-full overflow-hidden">
+<aside class="w-64 flex flex-col border-r border-[#152a55] bg-[#1A3263] text-white flex-shrink-0 z-20 shadow-lg">
+<div class="h-16 flex items-center gap-3 px-6 border-b border-[#2a457a]">
+<div class="bg-[#FAB95B] flex items-center justify-center rounded-lg size-8 text-[#1A3263]">
+<span class="material-symbols-outlined text-[20px]">auto_stories</span>
+</div>
+<div class="flex flex-col">
+<h1 class="text-white text-base font-bold leading-none tracking-wide">Scholarly AI</h1>
+<p class="text-[#A3B8D6] text-xs font-normal mt-1">Research Suite</p>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#2a457a] text-[#FAB95B] group shadow-inner border border-[#3b5998]/30" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#A3B8D6] hover:bg-[#2a457a] hover:text-white transition-colors group" href="#">
+<span class="material-symbols-outlined text-[20px]">note_add</span>
+<span class="text-sm font-medium">New Document</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#A3B8D6] hover:bg-[#2a457a] hover:text-white transition-colors group" href="#">
+<span class="material-symbols-outlined text-[20px]">library_books</span>
+<span class="text-sm font-medium">My Library</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#A3B8D6] hover:bg-[#2a457a] hover:text-white transition-colors group" href="#">
+<span class="material-symbols-outlined text-[20px]">history</span>
+<span class="text-sm font-medium">History</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#A3B8D6] hover:bg-[#2a457a] hover:text-white transition-colors group" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+<div class="mt-4 px-3">
+<p class="text-xs font-semibold text-[#547792] uppercase tracking-wider mb-2">Workspace</p>
+<button class="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-[#2a457a] bg-[#152a55] text-white text-sm hover:border-[#FAB95B] transition-colors shadow-sm">
+<span class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">category</span>
+                             Sci-Fi
+                        </span>
+<span class="material-symbols-outlined text-[18px]">expand_more</span>
+</button>
+</div>
+</div>
+<div class="p-4 border-t border-[#2a457a]">
+<div class="flex flex-col gap-3">
+<div class="flex items-center gap-2 text-white">
+<span class="material-symbols-outlined text-[20px]">cloud_queue</span>
+<span class="text-sm font-medium">Storage Used</span>
+</div>
+<div class="flex justify-between text-xs text-[#A3B8D6]">
+<span>15GB used</span>
+<span>75%</span>
+</div>
+<div class="w-full bg-[#0f1f40] rounded-full h-1.5">
+<div class="bg-[#FAB95B] h-1.5 rounded-full" style="width: 75%"></div>
+</div>
+<button class="text-xs text-[#FAB95B] hover:text-[#ffd699] font-medium text-left mt-1">Upgrade Plan</button>
+</div>
+</div>
+</aside>
+<main class="flex-1 flex flex-col h-full overflow-hidden relative bg-[#E8E2DB]">
+<header class="h-16 px-8 flex items-center justify-between border-b border-[#D1D5DB] bg-[#F5F7FA] flex-shrink-0 z-10 shadow-sm">
+<div class="flex-1 max-w-lg">
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-[#547792]">search</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-2 border border-[#CBD5E1] rounded-lg leading-5 bg-white text-[#1A3263] placeholder-[#94A3B8] focus:outline-none focus:ring-1 focus:ring-[#FAB95B] focus:border-[#FAB95B] sm:text-sm transition-colors shadow-sm" placeholder="Search documents, characters, or plots..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4 ml-6">
+<button class="relative p-2 text-[#547792] hover:text-[#1A3263] transition-colors rounded-full hover:bg-[#E2E8F0]">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-[#FAB95B] rounded-full border-2 border-[#F5F7FA]"></span>
+</button>
+<div class="h-8 w-[1px] bg-[#CBD5E1]"></div>
+<button class="flex items-center gap-3 group">
+<div class="text-right hidden sm:block">
+<p class="text-sm font-medium text-[#1A3263]">Sharvar</p>
+<p class="text-xs text-[#547792]">Writer Pro</p>
+</div>
+<div class="size-9 rounded-full bg-cover bg-center border border-[#CBD5E1]" data-alt="Portrait of a male user" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAiZoVMOiMaHxcM7hhptCsy-cs9_ZI1veI6Qus3iVpR8vwj4wRiP2PXlwHmcHEREFOLYkvYfOEznGPCmaQe85KyzUm5yS0w6Ll3FYSccSfHxyofygEEhwL29-YPXDxIGaiPw8FtRvvfe6R5m1hRA9nvN8P2yzOfotSprkA8p0luXtnws7rWX3AgoLZr8EjryVpfK-5e6vlVin56NCHVB7pOiv8S3ZZZYBJv7OyhQr-hS7NiqGzvNvutiHdK_jN9MFy5YseJl6aM3mex');"></div>
+</button>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto p-8 pb-20">
+<div class="max-w-6xl mx-auto space-y-8">
+<div class="flex flex-col gap-1">
+<h2 class="text-3xl font-bold text-[#1A3263] tracking-tight font-serif">Good morning, Sharvar</h2>
+<p class="text-[#547792]">Here's what's happening with your projects today.</p>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<div class="bg-white p-5 rounded-xl border border-[#E2E8F0] flex flex-col justify-between h-32 hover:border-[#FAB95B] transition-colors cursor-default group shadow-sm">
+<div class="flex justify-between items-start">
+<span class="text-[#547792] text-sm font-medium">Docs Analyzed</span>
+<span class="material-symbols-outlined text-[#1A3263] bg-[#E2E8F0] p-1.5 rounded-lg text-[20px]">analytics</span>
+</div>
+<div>
+<div class="text-2xl font-bold text-[#1A3263]">142</div>
+<div class="flex items-center gap-1 mt-1 text-xs font-medium text-[#2E7D32]">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+                                    +5% this week
+                                </div>
+</div>
+</div>
+<div class="bg-white p-5 rounded-xl border border-[#E2E8F0] flex flex-col justify-between h-32 hover:border-[#FAB95B] transition-colors cursor-default group shadow-sm">
+<div class="flex justify-between items-start">
+<span class="text-[#547792] text-sm font-medium">Acceptance Rate</span>
+<span class="material-symbols-outlined text-[#547792] bg-[#F1F5F9] p-1.5 rounded-lg text-[20px]">check_circle</span>
+</div>
+<div>
+<div class="text-2xl font-bold text-[#1A3263]">88%</div>
+<div class="flex items-center gap-1 mt-1 text-xs font-medium text-[#2E7D32]">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+                                    +2% this week
+                                </div>
+</div>
+</div>
+<div class="bg-white p-5 rounded-xl border border-[#E2E8F0] flex flex-col justify-between h-32 hover:border-[#FAB95B] transition-colors cursor-default group shadow-sm">
+<div class="flex justify-between items-start">
+<span class="text-[#547792] text-sm font-medium">Readability</span>
+<span class="material-symbols-outlined text-[#1A3263] bg-[#E2E8F0] p-1.5 rounded-lg text-[20px]">school</span>
+</div>
+<div>
+<div class="text-2xl font-bold text-[#1A3263]">Grade 11</div>
+<div class="flex items-center gap-1 mt-1 text-xs font-medium text-[#2E7D32]">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+                                    +0.5 this week
+                                </div>
+</div>
+</div>
+<div class="bg-white p-5 rounded-xl border border-[#E2E8F0] flex flex-col justify-between h-32 hover:border-[#FAB95B] transition-colors cursor-default group shadow-sm">
+<div class="flex justify-between items-start">
+<span class="text-[#547792] text-sm font-medium">Streak</span>
+<span class="material-symbols-outlined text-[#FAB95B] bg-[#FFF8E6] p-1.5 rounded-lg text-[20px]">local_fire_department</span>
+</div>
+<div>
+<div class="text-2xl font-bold text-[#1A3263]">12 Days</div>
+<div class="flex items-center gap-1 mt-1 text-xs font-medium text-[#547792]">
+                                    Keep it up!
+                                </div>
+</div>
+</div>
+</div>
+<div>
+<h3 class="text-lg font-semibold text-[#1A3263] mb-4">Quick Actions</h3>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<button class="flex flex-col items-center justify-center gap-3 p-6 rounded-xl bg-[#FAB95B] text-[#1A3263] hover:bg-[#F2A840] transition-all hover:scale-[1.02] shadow-md border border-[#F2A840]">
+<span class="material-symbols-outlined text-[32px]">add_circle</span>
+<span class="font-bold">New Document</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-3 p-6 rounded-xl bg-white border border-[#E2E8F0] text-[#547792] hover:border-[#FAB95B] hover:text-[#1A3263] hover:bg-[#FAFAFA] transition-all hover:scale-[1.02] shadow-sm">
+<span class="material-symbols-outlined text-[32px] text-[#547792]">compare_arrows</span>
+<span class="font-medium">Compare Drafts</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-3 p-6 rounded-xl bg-white border border-[#E2E8F0] text-[#547792] hover:border-[#FAB95B] hover:text-[#1A3263] hover:bg-[#FAFAFA] transition-all hover:scale-[1.02] shadow-sm">
+<span class="material-symbols-outlined text-[32px] text-[#547792]">mic</span>
+<span class="font-medium">Voice Input</span>
+</button>
+</div>
+</div>
+<div>
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-lg font-semibold text-[#1A3263]">Recent Documents</h3>
+<div class="flex gap-2">
+<button class="p-1.5 rounded text-[#547792] hover:text-[#1A3263] hover:bg-[#E2E8F0]">
+<span class="material-symbols-outlined text-[20px]">grid_view</span>
+</button>
+<button class="p-1.5 rounded text-[#547792] hover:text-[#1A3263] hover:bg-[#E2E8F0]">
+<span class="material-symbols-outlined text-[20px]">view_list</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<div class="bg-white border border-[#E2E8F0] rounded-xl p-5 hover:border-[#FAB95B] transition-all hover:shadow-lg shadow-sm group cursor-pointer relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-[#1A3263] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start mb-3">
+<span class="inline-flex items-center rounded-md bg-[#F1F5F9] px-2 py-1 text-xs font-medium text-[#1A3263] ring-1 ring-inset ring-[#CBD5E1]">Sci-Fi</span>
+<button class="text-[#94A3B8] hover:text-[#1A3263]"><span class="material-symbols-outlined text-[20px]">more_horiz</span></button>
+</div>
+<h4 class="text-lg font-bold text-[#1A3263] mb-1 truncate font-serif">Chapter 4 - The Twist</h4>
+<div class="text-xs text-[#547792] mb-4 flex items-center gap-2">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">description</span> 2,403 words</span>
+<span>•</span>
+<span class="text-[#2E7D32] font-medium">Score: 8.5</span>
+</div>
+<p class="text-sm text-[#547792] line-clamp-3 leading-relaxed font-serif italic border-l-2 border-[#FAB95B] pl-3">
+                                    The airlock hissed, a sound like a dying snake, and the void beyond yawned with indifferent hunger. Kael tightened his grip on the plasma wrench, his knuckles white against the dark metal...
+                                </p>
+<div class="mt-4 pt-4 border-t border-[#E2E8F0] flex items-center justify-between">
+<span class="text-xs text-[#94A3B8]">Edited 2h ago</span>
+<div class="flex -space-x-2">
+<div class="size-6 rounded-full border-2 border-white bg-cover bg-center" data-alt="Collaborator avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuArVsFtLr_8bWi-O9wqQT5PIXM0Qjl2lKD6tqLgZ3pHLX7nxzFSZxhx-xxE6ddJ4jP0ycMY9D_M4668hqN0aFWH7BXNbZ0kCvr3ntuuZ6-Wji7UpwIXB_hz3eWxq-A6djCSMKP1avTXEOMqzw1tL4cCPfxbxoXTHBZgubhn8WedYkaGkww9XJKHgegtbkRwTJ4Z8B9SZPFNzpBvskehpqbFhp0rB-q9cLdw2FmAJnxZkgYjOlXNt5jyEYNyYdPTHBtcqP90lw0FY2SO')"></div>
+</div>
+</div>
+</div>
+<div class="bg-white border border-[#E2E8F0] rounded-xl p-5 hover:border-[#FAB95B] transition-all hover:shadow-lg shadow-sm group cursor-pointer relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-[#1A3263] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start mb-3">
+<span class="inline-flex items-center rounded-md bg-[#F1F5F9] px-2 py-1 text-xs font-medium text-[#1A3263] ring-1 ring-inset ring-[#CBD5E1]">Fantasy</span>
+<button class="text-[#94A3B8] hover:text-[#1A3263]"><span class="material-symbols-outlined text-[20px]">more_horiz</span></button>
+</div>
+<h4 class="text-lg font-bold text-[#1A3263] mb-1 truncate font-serif">Character Study: Elara</h4>
+<div class="text-xs text-[#547792] mb-4 flex items-center gap-2">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">description</span> 890 words</span>
+<span>•</span>
+<span class="text-[#2E7D32] font-medium">Score: 9.2</span>
+</div>
+<p class="text-sm text-[#547792] line-clamp-3 leading-relaxed font-serif italic border-l-2 border-[#FAB95B] pl-3">
+                                    She wasn't born of fire, but she certainly carried it in her veins. Elara's eyes held the golden hue of ancient coins, hinting at a lineage far older than the kingdom itself...
+                                </p>
+<div class="mt-4 pt-4 border-t border-[#E2E8F0] flex items-center justify-between">
+<span class="text-xs text-[#94A3B8]">Edited yesterday</span>
+</div>
+</div>
+<div class="bg-white border border-[#E2E8F0] rounded-xl p-5 hover:border-[#FAB95B] transition-all hover:shadow-lg shadow-sm group cursor-pointer relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-[#1A3263] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start mb-3">
+<span class="inline-flex items-center rounded-md bg-[#F1F5F9] px-2 py-1 text-xs font-medium text-[#1A3263] ring-1 ring-inset ring-[#CBD5E1]">Non-Fiction</span>
+<button class="text-[#94A3B8] hover:text-[#1A3263]"><span class="material-symbols-outlined text-[20px]">more_horiz</span></button>
+</div>
+<h4 class="text-lg font-bold text-[#1A3263] mb-1 truncate font-serif">Blog Post: AI Trends</h4>
+<div class="text-xs text-[#547792] mb-4 flex items-center gap-2">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">description</span> 1,200 words</span>
+<span>•</span>
+<span class="text-[#E65100] font-medium">Score: 7.0</span>
+</div>
+<p class="text-sm text-[#547792] line-clamp-3 leading-relaxed font-serif italic border-l-2 border-[#FAB95B] pl-3">
+                                    Artificial intelligence is no longer just a buzzword; it is a fundamental shift in how we create. From generative models to predictive analytics, the landscape is shifting rapidly...
+                                </p>
+<div class="mt-4 pt-4 border-t border-[#E2E8F0] flex items-center justify-between">
+<span class="text-xs text-[#94A3B8]">Edited 2 days ago</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>

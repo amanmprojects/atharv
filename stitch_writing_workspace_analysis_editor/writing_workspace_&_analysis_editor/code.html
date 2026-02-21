@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NarrativeOS - Writing Workspace</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#FAB95B","primary-hover": "#E5A040",
+                        "secondary": "#547792","secondary-hover": "#436076",
+                        "background-editor": "#E8E2DB","background-panel": "#1A3263","surface-panel": "#25427D","surface-hover": "#2E4F91",
+                        "card-bg": "#FFFFFF","border-panel": "#2E4F91","border-editor": "#D1C9BE","text-main": "#FFFFFF","text-editor": "#222222","text-secondary": "#A3B8CC","text-muted": "#7590AA",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "editor": ["Merriweather", "serif"],
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #547792;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #FAB95B;
+        }
+        .editor-content p {
+            margin-bottom: 1.5em;
+            line-height: 1.8;
+            color: #222222;
+        }.highlight-suggestion {
+            background-color: rgba(250, 185, 91, 0.25);
+            border-bottom: 2px solid #FAB95B;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .highlight-suggestion:hover {
+            background-color: rgba(250, 185, 91, 0.4);
+        }
+        .highlight-active {
+            background-color: rgba(250, 185, 91, 0.5);
+            border-bottom: 2px solid #E5A040;
+        }aside ::-webkit-scrollbar-thumb {
+            background: #547792;
+        }
+    </style>
+</head>
+<body class="bg-background-editor text-text-editor font-display overflow-hidden h-screen flex flex-col antialiased">
+<header class="h-16 shrink-0 flex items-center justify-between border-b border-border-panel bg-background-panel px-6 z-20 shadow-md">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-3 text-text-main">
+<div class="size-6 text-primary">
+<span class="material-symbols-outlined !text-[24px]">auto_stories</span>
+</div>
+<h1 class="text-text-main text-lg font-bold tracking-tight">NarrativeOS</h1>
+</div>
+<div class="h-6 w-px bg-border-panel mx-2"></div>
+<div class="flex items-center gap-3">
+<span class="text-text-secondary">Projects</span>
+<span class="text-text-muted">/</span>
+<span class="text-text-main font-medium">The Glass Citadel</span>
+<span class="px-2 py-0.5 rounded text-xs font-medium bg-secondary text-white border border-secondary">Sci-Fi Thriller</span>
+</div>
+</div>
+<div class="flex items-center gap-1 bg-surface-panel rounded-lg p-1 border border-border-panel shadow-sm">
+<button class="px-3 py-1.5 rounded hover:bg-surface-hover text-text-secondary hover:text-text-main transition-colors">
+<span class="material-symbols-outlined !text-[20px]">undo</span>
+</button>
+<button class="px-3 py-1.5 rounded hover:bg-surface-hover text-text-secondary hover:text-text-main transition-colors">
+<span class="material-symbols-outlined !text-[20px]">redo</span>
+</button>
+<div class="w-px h-4 bg-border-panel mx-1"></div>
+<button class="px-3 py-1.5 rounded hover:bg-surface-hover text-text-secondary hover:text-text-main transition-colors">
+<span class="material-symbols-outlined !text-[20px]">format_bold</span>
+</button>
+<button class="px-3 py-1.5 rounded hover:bg-surface-hover text-text-secondary hover:text-text-main transition-colors">
+<span class="material-symbols-outlined !text-[20px]">format_italic</span>
+</button>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex h-9 items-center bg-surface-panel rounded-lg p-1 border border-border-panel shadow-sm">
+<button class="px-3 h-full flex items-center justify-center rounded text-xs font-medium text-text-secondary hover:text-text-main transition-colors">Draft</button>
+<button class="px-3 h-full flex items-center justify-center rounded bg-secondary text-white text-xs font-medium shadow-sm">Edit</button>
+<button class="px-3 h-full flex items-center justify-center rounded text-xs font-medium text-text-secondary hover:text-text-main transition-colors">Review</button>
+</div>
+<button class="flex items-center gap-2 h-9 px-4 bg-primary hover:bg-primary-hover text-background-panel text-sm font-bold rounded-lg transition-colors shadow-sm">
+<span class="material-symbols-outlined !text-[18px]">analytics</span>
+<span>Analyze</span>
+</button>
+<div class="h-9 w-9 rounded-full bg-surface-panel border border-border-panel flex items-center justify-center text-text-secondary cursor-pointer hover:text-primary hover:border-primary/50 transition-colors">
+<span class="material-symbols-outlined !text-[20px]">account_circle</span>
+</div>
+</div>
+</header>
+<main class="flex flex-1 overflow-hidden">
+<aside class="w-64 flex flex-col border-r border-border-panel bg-background-panel z-10 shrink-0 text-text-secondary">
+<div class="p-4 border-b border-border-panel">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-xs font-bold uppercase tracking-wider text-text-muted">Structure</h2>
+<button class="text-text-secondary hover:text-primary transition-colors">
+<span class="material-symbols-outlined !text-[18px]">add</span>
+</button>
+</div>
+<div class="space-y-1">
+<div class="flex items-center gap-2 px-3 py-2 rounded-lg text-text-secondary hover:bg-surface-hover hover:text-text-main cursor-pointer transition-colors group">
+<span class="material-symbols-outlined !text-[18px] text-text-muted group-hover:text-primary transition-colors">folder_open</span>
+<span class="text-sm">Prologue</span>
+</div>
+<div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-surface-hover text-text-main border-l-4 border-primary cursor-pointer transition-colors shadow-sm">
+<span class="material-symbols-outlined !text-[18px] text-primary">description</span>
+<span class="text-sm font-medium">Ch 1: The Inciting Incident</span>
+</div>
+<div class="flex items-center gap-2 px-3 py-2 rounded-lg text-text-secondary hover:bg-surface-hover hover:text-text-main cursor-pointer transition-colors group">
+<span class="material-symbols-outlined !text-[18px] text-text-muted group-hover:text-primary transition-colors">description</span>
+<span class="text-sm">Ch 2: The Fall</span>
+</div>
+<div class="flex items-center gap-2 px-3 py-2 rounded-lg text-text-secondary hover:bg-surface-hover hover:text-text-main cursor-pointer transition-colors group">
+<span class="material-symbols-outlined !text-[18px] text-text-muted group-hover:text-primary transition-colors">description</span>
+<span class="text-sm">Ch 3: Echoes</span>
+</div>
+</div>
+</div>
+<div class="flex-1 p-4 overflow-y-auto">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-xs font-bold uppercase tracking-wider text-text-muted">Characters</h2>
+<button class="text-text-secondary hover:text-primary transition-colors">
+<span class="material-symbols-outlined !text-[18px]">group_add</span>
+</button>
+</div>
+<div class="space-y-3">
+<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-hover cursor-pointer transition-colors border border-transparent hover:border-border-panel group">
+<div class="h-8 w-8 rounded-full bg-gradient-to-tr from-orange-700 to-primary flex items-center justify-center text-white text-xs font-bold shadow-sm">E</div>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-text-main">Elara Vance</span>
+<span class="text-[10px] text-primary font-medium">Protagonist</span>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-hover cursor-pointer transition-colors border border-transparent hover:border-border-panel group">
+<div class="h-8 w-8 rounded-full bg-surface-panel border border-border-panel flex items-center justify-center text-text-secondary text-xs font-bold">K</div>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-text-main">Kaelen Thorne</span>
+<span class="text-[10px] text-text-muted">Antagonist</span>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-surface-hover cursor-pointer transition-colors border border-transparent hover:border-border-panel group">
+<div class="h-8 w-8 rounded-full bg-surface-panel border border-border-panel flex items-center justify-center text-text-secondary text-xs font-bold">S</div>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-text-main">Sys-Op 9</span>
+<span class="text-[10px] text-text-muted">Supporting AI</span>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<section class="flex-1 bg-background-editor relative overflow-hidden flex flex-col">
+<div class="flex-1 overflow-y-auto px-16 py-12">
+<div class="max-w-[720px] mx-auto min-h-[800px] bg-white shadow-xl px-12 py-16 rounded-sm border border-border-editor/30">
+<h1 class="font-editor text-4xl text-text-editor font-bold mb-8">Chapter 1: The Inciting Incident</h1>
+<div class="editor-content font-editor text-lg text-text-editor">
+<p>The rain in Neo-Veridia didn't wash things clean; it just made the grime slicker. Elara pulled her collar up against the acidic drizzle, the neon reflections of the advertising blimps dancing across her visor like ghosts trapped in a machine.</p>
+<p>She hadn't planned on visiting the lower levels tonight. The data packet burned a virtual hole in her neural drive, encryption keys cycling uselessly against the firewall. <span class="highlight-suggestion" title="Click to view suggestion">She walked quickly down the alleyway</span>, her boots splashing through puddles of iridescent oil. Shadows lengthened, merging with the darkness between the flickering streetlamps.</p>
+<p>"You're late," a voice grated from the gloom. A figure detached itself from the wall, a bulky silhouette against the wet brick.</p>
+<p>Elara stopped, hand hovering near the pulse-emitter at her hip. "Traffic was murder," she said, voice steady despite the adrenaline spiking her biometrics. "Literally. Two drones down on Sector 4."</p>
+<p>The figure stepped into the light. <span class="highlight-active" title="Click to view suggestion">It was Kaelen. His cybernetic eye whirred softly as it focused on her</span>, the red lens contracting like a dying star. "Did you bring it?"</p>
+<p>"Depends," Elara countered, "on whether you have the credits." She tapped her temple, indicating the secure storage.</p>
+<p>Kaelen laughed, a sound like grinding gears. "Always business with you, Vance. That's why you're still alive in this city. Most people let their hearts bleed out before their wallets do." He tossed a cred-chip. It spun through the rain, a silver coin in the downpour, before she snatched it from the air.</p>
+<p>She slotted it into her wrist reader. Green light. Valid. "Transfer initiating," she murmured. The neural link engaged, a sudden rush of cold data flowing from her mind to the local mesh network.</p>
+<p>Suddenly, the air pressure dropped. The hum of the city ceased, replaced by a high-pitched whine that set her teeth on edge. Kaelen's red eye widened. "Jammer!" he hissed, drawing a kinetic pistol.</p>
+</div>
+</div>
+</div>
+<div class="h-10 bg-white border-t border-border-editor flex items-center justify-between px-6 shrink-0 z-20 text-[#547792]">
+<div class="flex items-center gap-6 text-xs font-medium">
+<span>Words: 1,243</span>
+<span>Characters: 6,890</span>
+<span>Read time: 5m 12s</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-xs uppercase tracking-wider font-bold text-[#547792]/70">LLM Budget</span>
+<div class="w-24 h-1.5 bg-[#E8E2DB] rounded-full overflow-hidden border border-[#D1C9BE]">
+<div class="h-full bg-primary w-[75%] rounded-full"></div>
+</div>
+<span class="text-xs font-mono font-bold text-[#1A3263]">75%</span>
+</div>
+</div>
+</section>
+<aside class="w-80 flex flex-col bg-background-panel border-l border-border-panel shrink-0 z-10">
+<div class="flex items-center border-b border-border-panel bg-surface-panel/30">
+<button class="flex-1 py-3 text-sm font-bold text-primary border-b-2 border-primary bg-surface-hover/50">Suggestions</button>
+<button class="flex-1 py-3 text-sm font-medium text-text-secondary hover:text-text-main hover:bg-surface-hover/50 transition-colors">Narrative</button>
+<button class="flex-1 py-3 text-sm font-medium text-text-secondary hover:text-text-main hover:bg-surface-hover/50 transition-colors">Style</button>
+</div>
+<div class="flex-1 overflow-y-auto p-4 space-y-4">
+<div class="bg-card-bg border border-border-editor rounded-xl p-4 shadow-lg relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary"></div>
+<div class="flex items-center justify-between mb-3 pl-2">
+<span class="text-xs font-bold text-[#1A3263] uppercase tracking-wider flex items-center gap-1">
+<span class="material-symbols-outlined !text-[14px] text-primary">psychology</span>
+                            Style &amp; Tone
+                        </span>
+<div class="flex items-center gap-1.5 bg-gray-100 px-2 py-1 rounded-full border border-gray-200">
+<div class="w-1.5 h-1.5 rounded-full bg-green-600"></div>
+<span class="text-[10px] font-bold text-gray-800">92%</span>
+</div>
+</div>
+<div class="pl-2 space-y-3">
+<p class="text-sm text-gray-700 font-medium">Consider strengthening the verb choice here to enhance tension and better match the genre tone.</p>
+<div class="bg-gray-50 rounded-lg p-3 text-sm font-editor border border-gray-200 shadow-inner">
+<div class="mb-2 pb-2 border-b border-gray-200">
+<span class="text-red-500 line-through decoration-red-400/50 opacity-70">It was Kaelen. His cybernetic eye whirred softly as it focused on her</span>
+</div>
+<div>
+<span class="text-green-700 font-medium">Kaelen loomed. His cybernetic eye ratcheted into focus, pinning her</span>
+</div>
+</div>
+<div class="flex gap-2 pt-1">
+<button class="flex-1 h-9 bg-primary hover:bg-primary-hover text-background-panel text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm">
+<span class="material-symbols-outlined !text-[16px]">check</span>
+                                Accept
+                            </button>
+<button class="flex-1 h-9 bg-transparent border border-gray-300 hover:border-secondary text-gray-500 hover:text-secondary text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined !text-[16px]">close</span>
+                                Reject
+                            </button>
+</div>
+</div>
+</div>
+<div class="bg-card-bg border border-border-editor rounded-xl p-4 opacity-90 hover:opacity-100 transition-opacity cursor-pointer hover:border-secondary shadow-lg">
+<div class="flex items-center justify-between mb-2">
+<span class="text-xs font-bold text-[#547792] uppercase tracking-wider flex items-center gap-1">
+<span class="material-symbols-outlined !text-[14px]">timer</span>
+                            Pacing
+                        </span>
+<span class="text-[10px] font-bold text-[#547792]">85%</span>
+</div>
+<p class="text-sm text-gray-700 mb-2 line-clamp-2">The movement in this paragraph feels passive. "She walked quickly" could be more visceral.</p>
+<div class="text-xs text-gray-500 font-mono bg-gray-100 px-2 py-1 rounded inline-block border border-gray-200">Line 14</div>
+</div>
+<div class="bg-card-bg border border-border-editor rounded-xl p-4 shadow-lg">
+<div class="flex items-center gap-2 mb-3 text-[#547792]">
+<span class="material-symbols-outlined !text-[18px]">auto_graph</span>
+<span class="text-xs font-bold uppercase tracking-wider">Tension Arc</span>
+</div>
+<div class="h-24 w-full flex items-end justify-between gap-1 px-1 bg-gray-50 rounded p-2 border border-gray-200">
+<div class="w-1/6 bg-secondary/30 rounded-t h-[30%] relative group">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[10px] px-2 py-1 rounded hidden group-hover:block whitespace-nowrap z-10 shadow-sm">Intro</div>
+</div>
+<div class="w-1/6 bg-secondary/40 rounded-t h-[45%]"></div>
+<div class="w-1/6 bg-secondary/60 rounded-t h-[60%]"></div>
+<div class="w-1/6 bg-primary rounded-t h-[85%] border-t-2 border-white relative shadow-sm">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-primary text-background-panel text-[10px] font-bold px-2 py-1 rounded shadow-md whitespace-nowrap z-10">Current</div>
+</div>
+<div class="w-1/6 bg-secondary/50 rounded-t h-[50%]"></div>
+<div class="w-1/6 bg-secondary/30 rounded-t h-[20%]"></div>
+</div>
+<p class="text-xs text-gray-500 mt-3 text-center">Tension is peaking. Good moment for a reveal.</p>
+</div>
+</div>
+</aside>
+</main>
+
+</body></html>

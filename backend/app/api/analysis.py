@@ -1,6 +1,7 @@
+import asyncio
 import uuid
 import time
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, HTTPException
 from app.schemas.analysis import (
     AnalysisRequest, AnalysisResponse,
@@ -29,6 +30,7 @@ from app.core.accessibility_engine import AccessibilityEngine
 from app.core.watermarking import StylometricWatermarker
 from app.core.deep_analysis_engine import DeepAnalysisEngine
 from app.services.gemini_client import gemini_client
+from app.services.cloud_language_client import cloud_language_client
 
 router = APIRouter()
 
@@ -69,11 +71,23 @@ async def analyze_text(request: AnalysisRequest):
     characters = []
     contradictions = []
     suggestions = []
+    cloud_entities: List[Dict[str, Any]] = []
+    cloud_sentiment: Optional[Dict[str, Any]] = None
+
+    if request.enable_narrative and request.enable_style:
+        cloud_entities, cloud_sentiment = await asyncio.gather(
+            cloud_language_client.analyze_entities(request.text),
+            cloud_language_client.analyze_sentiment(request.text),
+        )
+    elif request.enable_narrative:
+        cloud_entities = await cloud_language_client.analyze_entities(request.text)
+    elif request.enable_style:
+        cloud_sentiment = await cloud_language_client.analyze_sentiment(request.text)
     
     # MODULE 1: Narrative Consistency Engine
     if request.enable_narrative:
         narrative_result = narrative_engine.analyze(request.text)
-        characters = [
+        local_characters = [
             CharacterInfo(
                 name=c["name"],
                 aliases=c.get("aliases", []),
@@ -83,6 +97,13 @@ async def analyze_text(request: AnalysisRequest):
                 mention_count=c.get("mention_count", 0)
             )
             for c in narrative_result.get("characters", [])
+        ]
+        characters = _merge_character_sources(
+            local_characters, cloud_entities, request.text
+        )
+        contradictions = [
+            issue for issue in narrative_result.get("issues", [])
+            if issue.get("issue_type") == "contradiction"
         ]
         
         for issue in narrative_result.get("issues", []):
@@ -112,18 +133,28 @@ async def analyze_text(request: AnalysisRequest):
         structural_result = structural_engine.analyze(request.text)
         structural_issues = structural_result.get("issues", [])
         readability_scores = structural_result.get("readability_scores")
+        severity_map = {
+            "high": SeverityLevel.HIGH,
+            "medium": SeverityLevel.MEDIUM,
+            "low": SeverityLevel.LOW,
+        }
         
         for issue in structural_issues:
             rule = f"structural.{issue.get('issue_type', 'unknown')}"
+            confidence = _structural_issue_confidence(issue)
             suggestions.append(Suggestion(
                 suggestion_id=f"sug_{uuid.uuid4().hex[:8]}",
                 original_text="",
                 modified_text="",
                 rule_triggered=rule,
                 reason=issue.get("explanation", ""),
-                confidence=issue.get("score", 0.5),
+                confidence=confidence,
                 improvement_score=issue.get("score", 0.5),
                 source=SourceType.CUSTOM_PIPELINE,
+                severity=severity_map.get(
+                    issue.get("severity", "medium"),
+                    SeverityLevel.MEDIUM,
+                ),
                 status=SuggestionStatus.PENDING,
                 location=issue.get("location", {})
             ))
@@ -170,6 +201,9 @@ async def analyze_text(request: AnalysisRequest):
             rhetorical_question_frequency=style_metrics.rhetorical_question_frequency,
             paragraph_length_variance=style_metrics.paragraph_length_variance
         )
+        for style_suggestion in _build_sentiment_style_suggestions(cloud_sentiment):
+            suggestions.append(style_suggestion)
+            _track_rule_trigger(style_suggestion.rule_triggered)
     
     # MODULE 5: Knowledge Graph
     knowledge_graph = None
@@ -236,8 +270,8 @@ async def analyze_text(request: AnalysisRequest):
         paragraph_count=stats["paragraph_count"],
         language=language,
         characters=characters,
-        contradictions=[],
-        structural_issues=[],
+        contradictions=contradictions,
+        structural_issues=structural_issues,
         suggestions=suggestions,
         emotional_arc=emotional_arc,
         style_fingerprint=style_fingerprint,
@@ -399,3 +433,236 @@ def _track_rule_trigger(rule: str):
         analytics_store["rule_triggers"][rule] += 1
     else:
         analytics_store["rule_triggers"][rule] = 1
+
+
+def _structural_issue_confidence(issue: dict) -> float:
+    issue_type = issue.get("issue_type", "")
+    score = float(issue.get("score", 0.5))
+    score = max(0.0, min(1.0, score))
+
+    # For these checks, lower raw scores mean stronger evidence of a problem.
+    if issue_type in {"transition_gap", "weak_intro"}:
+        return round(1.0 - score, 3)
+
+    return round(score, 3)
+
+
+def _merge_character_sources(
+    local_characters: List[CharacterInfo],
+    cloud_entities: List[Dict[str, Any]],
+    text: str,
+) -> List[CharacterInfo]:
+    cloud_person_names: set[str] = set()
+    for entity in cloud_entities:
+        if entity.get("type") != "PERSON":
+            continue
+        entity_name = str(entity.get("name", "")).strip()
+        if entity_name:
+            cloud_person_names.add(entity_name.lower())
+
+    character_map: Dict[str, CharacterInfo] = {}
+    for c in local_characters:
+        key = c.name.lower()
+        if not _is_valid_character_name(c.name):
+            continue
+        # Keep local characters if they are strong local candidates or
+        # recognized by Cloud NL.
+        if c.mention_count >= 2 or key in cloud_person_names:
+            character_map[key] = c
+
+    for entity in cloud_entities:
+        if entity.get("type") != "PERSON":
+            continue
+
+        name = str(entity.get("name", "")).strip()
+        if not name or not _is_valid_character_name(name):
+            continue
+
+        mentions = entity.get("mentions", []) or []
+        mention_count = max(1, len(mentions))
+        first_mention_paragraph = 0
+
+        if mentions:
+            mention_text = mentions[0].get("text", {})
+            begin_offset = mention_text.get("beginOffset", -1)
+            if isinstance(begin_offset, int):
+                first_mention_paragraph = _paragraph_index_for_offset(
+                    text, begin_offset
+                )
+
+        alias_set = {
+            m.get("text", {}).get("content", "").strip()
+            for m in mentions
+            if m.get("text", {}).get("content")
+        }
+        alias_set.discard(name)
+        aliases = sorted(alias_set)
+
+        key = name.lower()
+        if key in character_map:
+            current = character_map[key]
+            current.aliases = sorted(set(current.aliases) | set(aliases))
+            current.mention_count = max(current.mention_count, mention_count)
+            current.first_mention_paragraph = min(
+                current.first_mention_paragraph,
+                first_mention_paragraph,
+            )
+            continue
+
+        character_map[key] = CharacterInfo(
+            name=name,
+            aliases=aliases,
+            traits=[],
+            role=None,
+            first_mention_paragraph=first_mention_paragraph,
+            mention_count=mention_count,
+        )
+
+    merged = list(character_map.values())
+    merged.sort(
+        key=lambda c: (-c.mention_count, c.first_mention_paragraph, c.name.lower())
+    )
+    return merged
+
+
+def _is_valid_character_name(name: str) -> bool:
+    normalized = name.strip().lower()
+    if not normalized:
+        return False
+
+    blocked = {
+        "he", "him", "his", "she", "her", "hers", "they", "them", "their", "theirs",
+        "you", "your", "yours", "we", "us", "our", "ours", "i", "me", "my", "mine",
+        "it", "its", "this", "that", "these", "those", "there", "here", "who",
+        "what", "when", "where", "why", "how", "then", "through", "after", "before",
+        "during", "one", "two", "three",
+    }
+    if normalized in blocked:
+        return False
+
+    return True
+
+
+def _paragraph_index_for_offset(text: str, begin_offset: int) -> int:
+    if begin_offset <= 0:
+        return 0
+
+    paragraphs = [p for p in text.split("\n\n") if p.strip()]
+    if not paragraphs:
+        return 0
+
+    running_offset = 0
+    for idx, paragraph in enumerate(paragraphs):
+        paragraph_end = running_offset + len(paragraph)
+        if begin_offset <= paragraph_end:
+            return idx
+        running_offset = paragraph_end + 2
+
+    return len(paragraphs) - 1
+
+
+def _build_sentiment_style_suggestions(
+    sentiment_payload: Optional[Dict[str, Any]]
+) -> List[Suggestion]:
+    if not sentiment_payload:
+        return []
+
+    suggestions: List[Suggestion] = []
+    document_sentiment = sentiment_payload.get("documentSentiment", {})
+    sentence_items = sentiment_payload.get("sentences", [])
+
+    score = float(document_sentiment.get("score", 0.0))
+    magnitude = float(document_sentiment.get("magnitude", 0.0))
+
+    sentence_scores = []
+    for sentence in sentence_items:
+        sentence_sentiment = sentence.get("sentiment", {})
+        sentence_score = sentence_sentiment.get("score")
+        if isinstance(sentence_score, (int, float)):
+            sentence_scores.append(float(sentence_score))
+
+    if magnitude < 0.3 and len(sentence_scores) >= 3:
+        suggestions.append(
+            Suggestion(
+                suggestion_id=f"sug_{uuid.uuid4().hex[:8]}",
+                original_text="",
+                modified_text="",
+                rule_triggered="style.flat_emotion",
+                reason=(
+                    "Emotional intensity is low across the document. "
+                    "Add stronger affective language in key moments."
+                ),
+                confidence=0.62,
+                improvement_score=0.45,
+                source=SourceType.CUSTOM_PIPELINE,
+                severity=SeverityLevel.LOW,
+                status=SuggestionStatus.PENDING,
+                location={},
+            )
+        )
+
+    if score > 0.65:
+        suggestions.append(
+            Suggestion(
+                suggestion_id=f"sug_{uuid.uuid4().hex[:8]}",
+                original_text="",
+                modified_text="",
+                rule_triggered="style.overly_positive_tone",
+                reason=(
+                    "Overall tone is strongly positive. Consider adding tension "
+                    "or contrast to improve narrative depth."
+                ),
+                confidence=0.58,
+                improvement_score=0.4,
+                source=SourceType.CUSTOM_PIPELINE,
+                severity=SeverityLevel.LOW,
+                status=SuggestionStatus.PENDING,
+                location={},
+            )
+        )
+    elif score < -0.65:
+        suggestions.append(
+            Suggestion(
+                suggestion_id=f"sug_{uuid.uuid4().hex[:8]}",
+                original_text="",
+                modified_text="",
+                rule_triggered="style.overly_negative_tone",
+                reason=(
+                    "Overall tone is strongly negative. Consider interleaving "
+                    "relief beats or neutral passages for pacing."
+                ),
+                confidence=0.58,
+                improvement_score=0.4,
+                source=SourceType.CUSTOM_PIPELINE,
+                severity=SeverityLevel.LOW,
+                status=SuggestionStatus.PENDING,
+                location={},
+            )
+        )
+
+    if len(sentence_scores) >= 4:
+        mean_score = sum(sentence_scores) / len(sentence_scores)
+        variance = sum(
+            (sentence_score - mean_score) ** 2 for sentence_score in sentence_scores
+        ) / len(sentence_scores)
+        if variance < 0.01:
+            suggestions.append(
+                Suggestion(
+                    suggestion_id=f"sug_{uuid.uuid4().hex[:8]}",
+                    original_text="",
+                    modified_text="",
+                    rule_triggered="style.monotone_tone_shift",
+                    reason=(
+                        "Sentence-level sentiment changes are limited. Introduce "
+                        "more tonal variation between sections."
+                    ),
+                    confidence=0.64,
+                    improvement_score=0.5,
+                    source=SourceType.CUSTOM_PIPELINE,
+                    severity=SeverityLevel.MEDIUM,
+                    status=SuggestionStatus.PENDING,
+                    location={},
+                )
+            )
+
+    return suggestions
