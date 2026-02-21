@@ -1,0 +1,7 @@
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+spacy>=3.7.0
+networkx>=3.2
+pydantic>=2.5.0
+python-multipart>=0.0.6
+textstat>=0.7.3
