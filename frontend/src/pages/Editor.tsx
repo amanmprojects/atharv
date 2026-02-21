@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
+import Tiptap from '@/components/Tiptap'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
@@ -230,11 +230,10 @@ export default function Editor() {
 
       <div className="flex-1 flex overflow-hidden">
         <div className="flex-1 p-4">
-          <Textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Paste or type your text here..."
-            className="h-full resize-none font-body text-base leading-relaxed border-2 border-foreground shadow-[4px_4px_0_0_hsl(var(--foreground))]"
+          <Tiptap
+            content={text}
+            onChange={setText}
+            className="h-full overflow-auto font-body text-base leading-relaxed border-2 border-foreground shadow-[4px_4px_0_0_hsl(var(--foreground))]"
           />
         </div>
 

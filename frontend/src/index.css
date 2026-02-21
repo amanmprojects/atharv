@@ -4,27 +4,35 @@
 
 @layer base {
   :root {
-    --background: 44 20% 95%; /* Cream/off-white */
-    --foreground: 0 0% 10%; /* Almost black */
+    --background: 44 20% 95%;
+    /* Cream/off-white */
+    --foreground: 0 0% 10%;
+    /* Almost black */
     --card: 0 0% 100%;
     --card-foreground: 0 0% 10%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 10%;
-    --primary: 74 88% 58%; /* Acid Lime Green */
-    --primary-foreground: 0 0% 10%; /* Black text on lime */
-    --secondary: 40 10% 90%; /* Slight darker cream for secondary */
+    --primary: 74 88% 58%;
+    /* Acid Lime Green */
+    --primary-foreground: 0 0% 10%;
+    /* Black text on lime */
+    --secondary: 40 10% 90%;
+    /* Slight darker cream for secondary */
     --secondary-foreground: 0 0% 10%;
     --muted: 40 10% 90%;
     --muted-foreground: 0 0% 45%;
-    --accent: 74 88% 58%; /* Lime Green */
+    --accent: 74 88% 58%;
+    /* Lime Green */
     --accent-foreground: 0 0% 10%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 0%; /* Stark solid black borders */
+    --border: 0 0% 0%;
+    /* Stark solid black borders */
     --input: 0 0% 0%;
     --ring: 74 88% 58%;
-    --radius: 0rem; /* Sharp, structured brutalism */
-    
+    --radius: 0rem;
+    /* Sharp, structured brutalism */
+
     --severity-high: 0 72% 51%;
     --severity-medium: 38 92% 50%;
     --severity-low: 48 89% 50%;
@@ -33,13 +41,16 @@
   }
 
   .dark {
-    --background: 0 0% 5%; /* Very dark deep grey/black */
-    --foreground: 44 20% 95%; /* Cream text */
+    --background: 0 0% 5%;
+    /* Very dark deep grey/black */
+    --foreground: 44 20% 95%;
+    /* Cream text */
     --card: 0 0% 8%;
     --card-foreground: 44 20% 95%;
     --popover: 0 0% 8%;
     --popover-foreground: 44 20% 95%;
-    --primary: 74 88% 58%; /* Acid Lime Green */
+    --primary: 74 88% 58%;
+    /* Acid Lime Green */
     --primary-foreground: 0 0% 10%;
     --secondary: 0 0% 12%;
     --secondary-foreground: 44 20% 95%;
@@ -49,10 +60,11 @@
     --accent-foreground: 0 0% 10%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 20%; /* Sharp grey border */
+    --border: 0 0% 20%;
+    /* Sharp grey border */
     --input: 0 0% 20%;
     --ring: 74 88% 58%;
-    
+
     --severity-high: 0 72% 70%;
     --severity-medium: 48 96% 61%;
     --severity-low: 54 98% 64%;
@@ -65,10 +77,17 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground font-body antialiased;
   }
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-heading;
   }
 }
@@ -96,4 +115,33 @@
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
   @apply bg-muted-foreground/30 rounded hover:bg-muted-foreground/50;
+}
+
+.tiptap {
+  min-height: 100%;
+  height: 100%;
+  outline: none;
+  padding: 10px;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  color: hsl(var(--muted-foreground));
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.tiptap:focus {
+  outline: none;
+}
+
+.tiptap p {
+  margin: 0;
+}
+
+.tiptap h1,
+.tiptap h2,
+.tiptap h3 {
+  @apply font-heading font-bold;
 }
