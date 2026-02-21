@@ -102,18 +102,11 @@ class EntityTracker:
             
             if name_lower in STOPWORDS:
                 continue
+            
             if name_lower in KNOWN_LOCATIONS:
                 entity_type = "location"
-            elif name_lower in words_seen:
-                entity_type = "person"
             else:
-                context_start = max(0, match.start() - 50)
-                context = text[context_start:match.start()].lower()
-                if any(word in context for word in ['said', 'replied', 'asked', 'told', 'whispered', 'shouted', 'called']):
-                    entity_type = "person"
-                else:
-                    words_seen.add(name_lower)
-                    continue
+                entity_type = "person"
             
             words_seen.add(name_lower)
             entities.append({
