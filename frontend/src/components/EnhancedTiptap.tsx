@@ -89,9 +89,9 @@ function ToolbarButton({ onClick, isActive, disabled, children, title }: Toolbar
       disabled={disabled}
       title={title}
       className={cn(
-        'p-2 hover:bg-muted transition-colors border-r border-foreground/20',
+        'rounded-sm border border-transparent p-2 text-muted-foreground transition-colors hover:bg-panel-hover/10 hover:text-foreground',
         'disabled:opacity-50 disabled:cursor-not-allowed',
-        isActive && 'bg-muted'
+        isActive && 'border-primary/50 bg-primary/15 text-foreground'
       )}
     >
       {children}
@@ -139,7 +139,7 @@ export default function EnhancedTiptap({
     content,
     editorProps: {
       attributes: {
-        class: 'tiptap prose prose-sm max-w-none focus:outline-none min-h-[300px] p-4',
+        class: 'tiptap focus:outline-none',
       },
     },
     onUpdate: ({ editor }) => {
@@ -181,8 +181,8 @@ export default function EnhancedTiptap({
 
   if (!editor) {
     return (
-      <div className="flex items-center justify-center h-[300px] border-2 border-foreground shadow-[4px_4px_0_0_hsl(var(--foreground))]">
-        <p className="font-mono text-sm">Loading editor...</p>
+      <div className="flex h-[300px] items-center justify-center rounded-md border border-editor-border bg-editor-page shadow-panel">
+        <p className="text-sm text-muted-foreground">Loading editor...</p>
       </div>
     )
   }
@@ -191,14 +191,14 @@ export default function EnhancedTiptap({
 
   return (
     <div className={cn('h-full flex flex-col', className)}>
-      <div className="border-b-2 border-foreground bg-card sticky top-0 z-20 relative">
+      <div className="sticky top-0 z-20 border-b border-panel-border bg-panel-bg px-2 py-1.5 text-text-main">
         {isSaving && (
-          <div className="absolute top-2 right-3 text-[10px] font-mono uppercase tracking-wider px-2 py-1 border border-foreground/30 bg-background">
+          <div className="absolute right-3 top-2 rounded-sm border border-panel-border bg-panel-surface px-2 py-1 text-[10px] uppercase tracking-[0.14em] text-text-secondary">
             Syncing
           </div>
         )}
-        <div className="flex items-center flex-wrap pr-20">
-          <div className="flex items-center border-r-2 border-foreground/20">
+        <div className="flex flex-wrap items-center gap-1.5 pr-20">
+          <div className="flex items-center gap-1 border-r border-panel-border pr-1.5">
             <ToolbarButton
               onClick={() => editor.chain().focus().undo().run()}
               disabled={!editor.can().undo()}
@@ -215,7 +215,7 @@ export default function EnhancedTiptap({
             </ToolbarButton>
           </div>
 
-          <div className="flex items-center border-r-2 border-foreground/20">
+          <div className="flex items-center gap-1 border-r border-panel-border pr-1.5">
             <ToolbarButton
               onClick={() => editor.chain().focus().toggleBold().run()}
               isActive={editor.isActive('bold')}
@@ -260,7 +260,7 @@ export default function EnhancedTiptap({
             </ToolbarButton>
           </div>
 
-          <div className="flex items-center border-r-2 border-foreground/20">
+          <div className="flex items-center gap-1 border-r border-panel-border pr-1.5">
             <ToolbarButton
               onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
               isActive={editor.isActive('heading', { level: 1 })}
@@ -284,7 +284,7 @@ export default function EnhancedTiptap({
             </ToolbarButton>
           </div>
 
-          <div className="flex items-center border-r-2 border-foreground/20 px-2">
+          <div className="flex items-center border-r border-panel-border px-2">
             <select
               aria-label="Font size"
               value={activeFontSize}
@@ -292,7 +292,7 @@ export default function EnhancedTiptap({
                 const size = event.target.value
                 editor.chain().focus().setMark('textStyle', { fontSize: size }).run()
               }}
-              className="h-8 border border-foreground/30 bg-card px-2 text-xs font-mono focus:outline-none"
+              className="h-8 rounded-sm border border-panel-border bg-panel-surface px-2 text-xs text-text-main outline-none focus:border-primary"
               title="Text size"
             >
               {FONT_SIZE_OPTIONS.map(size => (
@@ -303,7 +303,7 @@ export default function EnhancedTiptap({
             </select>
           </div>
 
-          <div className="flex items-center border-r-2 border-foreground/20">
+          <div className="flex items-center gap-1 border-r border-panel-border pr-1.5">
             <ToolbarButton
               onClick={() => editor.chain().focus().setTextAlign('left').run()}
               isActive={editor.isActive({ textAlign: 'left' })}
@@ -327,7 +327,7 @@ export default function EnhancedTiptap({
             </ToolbarButton>
           </div>
 
-          <div className="flex items-center border-r-2 border-foreground/20">
+          <div className="flex items-center gap-1 border-r border-panel-border pr-1.5">
             <ToolbarButton
               onClick={() => editor.chain().focus().toggleBulletList().run()}
               isActive={editor.isActive('bulletList')}
@@ -368,9 +368,9 @@ export default function EnhancedTiptap({
                   <Sparkles size={16} className="text-primary" />
                 </ToolbarButton>
                 {showAIMenu && (
-                  <div className="absolute top-full left-0 mt-1 bg-card border-2 border-foreground shadow-[2px_2px_0_0_hsl(var(--foreground))] min-w-[160px] z-30">
+                  <div className="absolute left-0 top-full z-30 mt-1.5 min-w-[180px] rounded-md border border-panel-border bg-panel-surface p-1 shadow-panel">
                     <button
-                      className="w-full px-3 py-2 text-left font-mono text-xs hover:bg-muted border-b border-foreground/10"
+                      className="w-full rounded-sm border-b border-panel-border px-3 py-2 text-left text-xs hover:bg-panel-hover/50"
                       onClick={() => {
                         onAIAction('summarize')
                         setShowAIMenu(false)
@@ -379,7 +379,7 @@ export default function EnhancedTiptap({
                       Summarize
                     </button>
                     <button
-                      className="w-full px-3 py-2 text-left font-mono text-xs hover:bg-muted border-b border-foreground/10"
+                      className="w-full rounded-sm border-b border-panel-border px-3 py-2 text-left text-xs hover:bg-panel-hover/50"
                       onClick={() => {
                         onAIAction('improve')
                         setShowAIMenu(false)
@@ -388,7 +388,7 @@ export default function EnhancedTiptap({
                       Improve Writing
                     </button>
                     <button
-                      className="w-full px-3 py-2 text-left font-mono text-xs hover:bg-muted border-b border-foreground/10"
+                      className="w-full rounded-sm border-b border-panel-border px-3 py-2 text-left text-xs hover:bg-panel-hover/50"
                       onClick={() => {
                         onAIAction('expand')
                         setShowAIMenu(false)
@@ -397,7 +397,7 @@ export default function EnhancedTiptap({
                       Expand
                     </button>
                     <button
-                      className="w-full px-3 py-2 text-left font-mono text-xs hover:bg-muted"
+                      className="w-full rounded-sm px-3 py-2 text-left text-xs hover:bg-panel-hover/50"
                       onClick={() => {
                         onAIAction('shorten')
                         setShowAIMenu(false)
@@ -413,8 +413,10 @@ export default function EnhancedTiptap({
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto bg-background">
-        <EditorContent editor={editor} className="h-full" />
+      <div className="scrollbar-thin flex-1 overflow-auto bg-editor-bg px-8 py-8">
+        <div className="mx-auto w-full max-w-[860px] min-h-[calc(100vh-220px)] rounded-sm border border-editor-border/70 bg-editor-page px-14 py-14 shadow-panel">
+        <EditorContent editor={editor} className="h-full min-h-full" />
+        </div>
       </div>
     </div>
   )

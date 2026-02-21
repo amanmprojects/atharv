@@ -41,12 +41,12 @@ export default function AccessibilityPage() {
 
     return (
         <div className="p-6 lg:p-12 max-w-7xl mx-auto space-y-8">
-            <div className="pb-6 border-b-4 border-foreground">
-                <h1 className="text-5xl md:text-6xl font-heading font-black tracking-tighter uppercase leading-none flex items-center gap-4">
+            <div className="pb-6 border-b border-border">
+                <h1 className="text-5xl md:text-6xl font-heading font-semibold tracking-tighter uppercase leading-none flex items-center gap-4">
                     <AccessibilityIcon className="h-10 w-10 text-primary" strokeWidth={3} />
                     Accessibility
                 </h1>
-                <p className="text-muted-foreground font-mono text-sm mt-3 uppercase tracking-widest">
+                <p className="text-muted-foreground text-sm mt-3 uppercase tracking-widest">
                     Inclusive AI — Sentence simplification, ADHD support, dyslexia-friendly output
                 </p>
             </div>
@@ -57,12 +57,12 @@ export default function AccessibilityPage() {
                         value={text}
                         onChange={(e) => setText(e.target.value)}
                         placeholder="Paste your text here for accessibility analysis..."
-                        className="h-64 resize-none border-2 border-foreground shadow-[4px_4px_0_0_hsl(var(--foreground))]"
+                        className="h-64 resize-none border border-border shadow-sm"
                     />
                     <Button
                         onClick={handleAnalyze}
                         disabled={isAnalyzing}
-                        className="bg-primary text-primary-foreground px-8 font-black uppercase border-2 border-foreground shadow-[4px_4px_0_0_hsl(var(--foreground))] hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_hsl(var(--foreground))] transition-all rounded-none"
+                        className="bg-primary text-primary-foreground px-8 font-semibold uppercase border border-border shadow-sm hover:translate-y-0.5 hover:shadow-sm transition-all rounded-md"
                     >
                         {isAnalyzing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <AccessibilityIcon className="h-4 w-4 mr-2" />}
                         Analyze Accessibility
@@ -70,12 +70,12 @@ export default function AccessibilityPage() {
                 </div>
 
                 {result && (
-                    <div className="bg-card border-4 border-foreground p-6 shadow-[8px_8px_0_0_hsl(var(--foreground))]">
-                        <h3 className="text-sm font-black uppercase tracking-widest mb-2">Overall Score</h3>
-                        <div className={`text-7xl font-black tracking-tighter ${getGradeColor(result.overall_accessibility_score.grade)}`}>
+                    <div className="bg-card border border-border p-6 shadow-sm">
+                        <h3 className="text-sm font-semibold uppercase tracking-widest mb-2">Overall Score</h3>
+                        <div className={`text-7xl font-semibold tracking-tighter ${getGradeColor(result.overall_accessibility_score.grade)}`}>
                             {result.overall_accessibility_score.overall}
                         </div>
-                        <p className={`text-lg font-black uppercase mt-1 ${getGradeColor(result.overall_accessibility_score.grade)}`}>
+                        <p className={`text-lg font-semibold uppercase mt-1 ${getGradeColor(result.overall_accessibility_score.grade)}`}>
                             {result.overall_accessibility_score.grade}
                         </p>
                         <div className="mt-4 space-y-2">
@@ -102,13 +102,13 @@ export default function AccessibilityPage() {
             {result && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Sentence Simplification */}
-                    <div className="bg-card border-2 border-foreground p-6 shadow-[4px_4px_0_0_hsl(var(--foreground))]">
-                        <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-foreground/20">
+                    <div className="bg-card border border-border p-6 shadow-sm">
+                        <div className="flex items-center gap-2 mb-4 pb-2 border-b border-border/40">
                             <BookOpen className="h-5 w-5 text-primary" strokeWidth={2.5} />
-                            <h3 className="font-black uppercase text-sm tracking-tight">Sentence Simplification</h3>
+                            <h3 className="font-semibold uppercase text-sm tracking-tight">Sentence Simplification</h3>
                         </div>
                         <p className="text-sm mb-4">
-                            <span className="font-black text-2xl">{result.simplification.complex_count}</span>
+                            <span className="font-semibold text-2xl">{result.simplification.complex_count}</span>
                             <span className="text-muted-foreground ml-2">of {result.simplification.total_sentences} sentences need simplification ({result.simplification.simplification_potential}%)</span>
                         </p>
                         <div className="space-y-3 max-h-80 overflow-auto scrollbar-thin">
@@ -118,7 +118,7 @@ export default function AccessibilityPage() {
                                     <p className="text-xs text-green-600 font-medium">{s.simplified.slice(0, 120)}...</p>
                                     <div className="flex gap-2 mt-2">
                                         {s.changes.map((c, j) => (
-                                            <span key={j} className="text-[10px] bg-background px-2 py-0.5 border border-foreground/20">{c}</span>
+                                            <span key={j} className="text-[10px] bg-background px-2 py-0.5 border border-border/45">{c}</span>
                                         ))}
                                     </div>
                                 </div>
@@ -127,17 +127,17 @@ export default function AccessibilityPage() {
                     </div>
 
                     {/* Idea Clustering (ADHD Support) */}
-                    <div className="bg-card border-2 border-foreground p-6 shadow-[4px_4px_0_0_hsl(var(--foreground))]">
-                        <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-foreground/20">
+                    <div className="bg-card border border-border p-6 shadow-sm">
+                        <div className="flex items-center gap-2 mb-4 pb-2 border-b border-border/40">
                             <Brain className="h-5 w-5 text-primary" strokeWidth={2.5} />
-                            <h3 className="font-black uppercase text-sm tracking-tight">Idea Clustering (ADHD Support)</h3>
+                            <h3 className="font-semibold uppercase text-sm tracking-tight">Idea Clustering (ADHD Support)</h3>
                         </div>
                         <p className="text-sm mb-2">{result.idea_clusters.suggestion}</p>
                         <div className="space-y-3 mt-4">
                             {result.idea_clusters.clusters.map((cluster, i) => (
                                 <div key={i} className={`p-3 border-2 ${cluster.is_scattered ? 'border-yellow-500 bg-yellow-500/5' : 'border-green-500/30 bg-green-500/5'}`}>
                                     <div className="flex items-center gap-2 mb-1">
-                                        <span className="text-sm font-black uppercase">{cluster.topic}</span>
+                                        <span className="text-sm font-semibold uppercase">{cluster.topic}</span>
                                         {cluster.is_scattered && <span className="text-[10px] bg-yellow-500 text-black px-2 py-0.5 font-bold">SCATTERED</span>}
                                     </div>
                                     <p className="text-xs text-muted-foreground">
@@ -150,13 +150,13 @@ export default function AccessibilityPage() {
                     </div>
 
                     {/* Naturalness Score */}
-                    <div className="bg-card border-2 border-foreground p-6 shadow-[4px_4px_0_0_hsl(var(--foreground))]">
-                        <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-foreground/20">
+                    <div className="bg-card border border-border p-6 shadow-sm">
+                        <div className="flex items-center gap-2 mb-4 pb-2 border-b border-border/40">
                             <Languages className="h-5 w-5 text-primary" strokeWidth={2.5} />
-                            <h3 className="font-black uppercase text-sm tracking-tight">Naturalness (L2 English)</h3>
+                            <h3 className="font-semibold uppercase text-sm tracking-tight">Naturalness (L2 English)</h3>
                         </div>
                         <div className="flex items-baseline gap-3">
-                            <span className="text-5xl font-black">{result.naturalness.score}</span>
+                            <span className="text-5xl font-semibold">{result.naturalness.score}</span>
                             <span className={`text-lg font-bold ${getGradeColor(
                                 result.naturalness.score > 90 ? 'Excellent' :
                                     result.naturalness.score > 70 ? 'Good' :
@@ -175,14 +175,14 @@ export default function AccessibilityPage() {
                     </div>
 
                     {/* Dyslexia Suggestions */}
-                    <div className="bg-card border-2 border-foreground p-6 shadow-[4px_4px_0_0_hsl(var(--foreground))]">
-                        <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-foreground/20">
+                    <div className="bg-card border border-border p-6 shadow-sm">
+                        <div className="flex items-center gap-2 mb-4 pb-2 border-b border-border/40">
                             <Eye className="h-5 w-5 text-primary" strokeWidth={2.5} />
-                            <h3 className="font-black uppercase text-sm tracking-tight">Dyslexia-Friendly</h3>
+                            <h3 className="font-semibold uppercase text-sm tracking-tight">Dyslexia-Friendly</h3>
                         </div>
                         <div className="flex items-baseline gap-2 mb-4">
-                            <span className="text-3xl font-black">{result.dyslexia_suggestions.dyslexia_friendly_score}</span>
-                            <span className="text-xs text-muted-foreground font-mono">/ 100</span>
+                            <span className="text-3xl font-semibold">{result.dyslexia_suggestions.dyslexia_friendly_score}</span>
+                            <span className="text-xs text-muted-foreground text-sm">/ 100</span>
                         </div>
                         <div className="space-y-2">
                             {result.dyslexia_suggestions.suggestions.map((s, i) => (

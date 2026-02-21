@@ -20,6 +20,23 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        panel: {
+          bg: "hsl(var(--panel-bg))",
+          surface: "hsl(var(--panel-surface))",
+          hover: "hsl(var(--panel-hover))",
+          border: "hsl(var(--panel-border))",
+        },
+        editor: {
+          bg: "hsl(var(--editor-bg))",
+          page: "hsl(var(--editor-page))",
+          border: "hsl(var(--editor-border))",
+        },
+        text: {
+          main: "hsl(var(--text-main))",
+          editor: "hsl(var(--text-editor))",
+          secondary: "hsl(var(--text-secondary))",
+          muted: "hsl(var(--text-muted))",
+        },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -65,7 +82,11 @@ export default {
       },
       fontFamily: {
         body: ["Inter", "system-ui", "sans-serif"],
-        heading: ["Space Grotesk", "system-ui", "sans-serif"],
+        heading: ["Inter", "system-ui", "sans-serif"],
+        editor: ["Merriweather", "ui-serif", "Georgia", "serif"],
+      },
+      boxShadow: {
+        panel: "0 12px 30px -16px rgba(16, 36, 75, 0.35)",
       },
       keyframes: {
         "accordion-down": {

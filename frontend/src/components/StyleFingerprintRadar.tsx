@@ -17,11 +17,11 @@ export default function StyleFingerprintRadar({ data }: StyleFingerprintRadarPro
 
   return (
     <div>
-      <h3 className="text-sm font-semibold mb-2">Style Fingerprint</h3>
+      <h3 className="mb-2 text-sm font-semibold">Style Fingerprint</h3>
       <div className="h-56">
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart data={chartData}>
-            <PolarGrid className="stroke-muted" />
+            <PolarGrid className="stroke-border/60" />
             <PolarAngleAxis 
               dataKey="metric" 
               tick={{ fontSize: 10 }}
@@ -45,8 +45,9 @@ export default function StyleFingerprintRadar({ data }: StyleFingerprintRadarPro
               contentStyle={{
                 backgroundColor: 'hsl(var(--card))',
                 border: '1px solid hsl(var(--border))',
-                borderRadius: '6px',
+                borderRadius: '8px',
                 fontSize: '12px',
+                boxShadow: '0 8px 20px -12px rgba(10, 24, 52, 0.4)',
               }}
               formatter={(value: number) => [`${(value * 100).toFixed(0)}%`]}
             />
@@ -54,7 +55,7 @@ export default function StyleFingerprintRadar({ data }: StyleFingerprintRadarPro
         </ResponsiveContainer>
       </div>
       
-      <div className="grid grid-cols-2 gap-2 mt-4">
+      <div className="mt-4 grid grid-cols-2 gap-2">
         <div className="text-xs">
           <span className="text-muted-foreground">Avg Sentence:</span>
           <span className="ml-1 font-medium">{data.sentence_length_mean.toFixed(1)} words</span>

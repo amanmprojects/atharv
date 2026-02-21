@@ -10,22 +10,22 @@ interface SuggestionCardProps {
 }
 
 const severityStyles: Record<string, string> = {
-  high: 'bg-red-500/20 text-red-400 border border-red-500/30',
-  medium: 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30',
-  low: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
+  high: 'border border-red-500/40 bg-red-500/10 text-red-600 dark:text-red-300',
+  medium: 'border border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300',
+  low: 'border border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-300',
 }
 
 const categoryColors: Record<string, string> = {
-  grammar: 'bg-red-500/15 text-red-500',
-  consistency: 'bg-orange-500/15 text-orange-500',
-  logic: 'bg-purple-500/15 text-purple-500',
-  narrative: 'bg-violet-500/15 text-violet-500',
-  style: 'bg-cyan-500/15 text-cyan-500',
-  pacing: 'bg-amber-500/15 text-amber-500',
-  redundancy: 'bg-yellow-500/15 text-yellow-500',
-  structure: 'bg-indigo-500/15 text-indigo-500',
-  structural: 'bg-indigo-500/15 text-indigo-500',
-  seo: 'bg-green-500/15 text-green-500',
+  grammar: 'bg-red-500/10 text-red-700 dark:text-red-300',
+  consistency: 'bg-orange-500/10 text-orange-700 dark:text-orange-300',
+  logic: 'bg-purple-500/10 text-purple-700 dark:text-purple-300',
+  narrative: 'bg-violet-500/10 text-violet-700 dark:text-violet-300',
+  style: 'bg-cyan-500/10 text-cyan-700 dark:text-cyan-300',
+  pacing: 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
+  redundancy: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-300',
+  structure: 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300',
+  structural: 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300',
+  seo: 'bg-green-500/10 text-green-700 dark:text-green-300',
 }
 
 export default function SuggestionCard({ suggestion, onAccept, onReject }: SuggestionCardProps) {
@@ -44,35 +44,35 @@ export default function SuggestionCard({ suggestion, onAccept, onReject }: Sugge
   const categoryStyle = categoryColors[category] || 'bg-muted text-muted-foreground'
 
   return (
-    <div className={`border-2 border-foreground/20 p-3 bg-background shadow-[2px_2px_0_0_hsl(var(--foreground)/0.1)] ${suggestion.status === 'accepted' ? 'border-green-500/50 bg-green-500/5' :
+    <div className={`rounded-md border border-border bg-card p-4 shadow-sm ${suggestion.status === 'accepted' ? 'border-green-500/50 bg-green-500/5' :
         suggestion.status === 'rejected' ? 'border-red-500/30 opacity-60' : ''
       }`}>
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="flex items-center gap-1.5 flex-wrap">
-          <span className={`text-[10px] px-1.5 py-0.5 font-black uppercase ${severityStyles[severity]}`}>
+          <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${severityStyles[severity]}`}>
             {severity}
           </span>
-          <span className={`text-[10px] px-1.5 py-0.5 font-bold uppercase ${categoryStyle}`}>
+          <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium uppercase ${categoryStyle}`}>
             {category}
           </span>
-          <span className="text-[10px] px-1.5 py-0.5 bg-muted font-bold uppercase text-muted-foreground">
+          <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase text-muted-foreground">
             {suggestion.source === 'custom_pipeline' ? 'NLP' : 'LLM'}
           </span>
         </div>
-        <span className="text-[10px] font-mono text-muted-foreground whitespace-nowrap">
+        <span className="whitespace-nowrap text-[10px] text-muted-foreground">
           {getRuleLabel(suggestion.rule_triggered)}
         </span>
       </div>
 
       {suggestion.original_text && (
-        <div className="mb-2 p-2 bg-red-500/5 border border-red-500/15 text-xs line-through text-muted-foreground font-mono">
+        <div className="mb-2 rounded-sm border border-red-500/15 bg-red-500/5 p-2 text-xs text-muted-foreground line-through">
           {suggestion.original_text.slice(0, 150)}
           {suggestion.original_text.length > 150 && '...'}
         </div>
       )}
 
       {suggestion.modified_text && (
-        <div className="mb-2 p-2 bg-green-500/10 border border-green-500/20 text-xs text-green-600 dark:text-green-400 font-mono">
+        <div className="mb-2 rounded-sm border border-green-500/20 bg-green-500/10 p-2 text-xs text-green-700 dark:text-green-300">
           ✓ {suggestion.modified_text.slice(0, 150)}
           {suggestion.modified_text.length > 150 && '...'}
         </div>
@@ -86,7 +86,7 @@ export default function SuggestionCard({ suggestion, onAccept, onReject }: Sugge
         <div className="flex-1">
           <div className="flex items-center justify-between text-[10px] mb-1">
             <span className="text-muted-foreground font-bold uppercase">Confidence</span>
-            <span className="font-mono">{Math.round(suggestion.confidence * 100)}%</span>
+            <span className="font-medium">{Math.round(suggestion.confidence * 100)}%</span>
           </div>
           <Progress value={suggestion.confidence * 100} className="h-1" />
         </div>
@@ -95,19 +95,19 @@ export default function SuggestionCard({ suggestion, onAccept, onReject }: Sugge
       {suggestion.status === 'pending' ? (
         <div className="flex gap-2">
           <Button size="sm" onClick={onAccept}
-            className="flex-1 h-7 text-xs font-black uppercase bg-primary text-primary-foreground border border-foreground shadow-[2px_2px_0_0_hsl(var(--foreground))] rounded-none hover:translate-y-0.5 hover:shadow-none transition-all">
+            className="h-8 flex-1 text-xs font-semibold uppercase">
             <Check className="h-3 w-3 mr-1" />
             Accept
           </Button>
           <Button size="sm" variant="outline" onClick={onReject}
-            className="flex-1 h-7 text-xs font-black uppercase border-2 border-foreground/30 rounded-none hover:bg-red-500/10 transition-all">
+            className="h-8 flex-1 text-xs font-semibold uppercase hover:border-red-500/40 hover:bg-red-500/10">
             <X className="h-3 w-3 mr-1" />
             Reject
           </Button>
         </div>
       ) : (
-        <div className={`text-xs font-black uppercase ${suggestion.status === 'accepted' ? 'text-green-500' : 'text-red-400'}`}>
-          {suggestion.status === 'accepted' ? '✓ ACCEPTED — Applied to text' : '✗ REJECTED'}
+        <div className={`text-xs font-semibold uppercase tracking-[0.08em] ${suggestion.status === 'accepted' ? 'text-green-600 dark:text-green-300' : 'text-red-500 dark:text-red-300'}`}>
+          {suggestion.status === 'accepted' ? 'Accepted • Applied to text' : 'Rejected'}
         </div>
       )}
     </div>

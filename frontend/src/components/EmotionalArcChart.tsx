@@ -6,14 +6,14 @@ interface EmotionalArcChartProps {
 }
 
 const emotionColors: Record<string, string> = {
-  joy: '#22c55e',
-  sadness: '#3b82f6',
-  anger: '#ef4444',
-  fear: '#8b5cf6',
-  surprise: '#f59e0b',
-  disgust: '#84cc16',
-  anticipation: '#06b6d4',
-  trust: '#ec4899',
+  joy: '#2f9e5b',
+  sadness: '#4068b8',
+  anger: '#d45555',
+  fear: '#7953b8',
+  surprise: '#d29a3b',
+  disgust: '#769543',
+  anticipation: '#2f8fb8',
+  trust: '#cc6f95',
 }
 
 export default function EmotionalArcChart({ data }: EmotionalArcChartProps) {
@@ -25,10 +25,10 @@ export default function EmotionalArcChart({ data }: EmotionalArcChartProps) {
   }))
 
   return (
-    <div className="w-full h-48">
+    <div className="h-48 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+          <CartesianGrid strokeDasharray="3 3" className="stroke-border/60" />
           <XAxis 
             dataKey="paragraph" 
             tick={{ fontSize: 10 }}
@@ -43,8 +43,9 @@ export default function EmotionalArcChart({ data }: EmotionalArcChartProps) {
             contentStyle={{
               backgroundColor: 'hsl(var(--card))',
               border: '1px solid hsl(var(--border))',
-              borderRadius: '6px',
+              borderRadius: '8px',
               fontSize: '12px',
+              boxShadow: '0 8px 20px -12px rgba(10, 24, 52, 0.4)',
             }}
             formatter={(value: number) => [`${(value * 100).toFixed(0)}%`]}
           />
@@ -59,13 +60,13 @@ export default function EmotionalArcChart({ data }: EmotionalArcChartProps) {
         </AreaChart>
       </ResponsiveContainer>
       
-      <div className="mt-2 flex flex-wrap gap-2 justify-center">
+      <div className="mt-2 flex flex-wrap justify-center gap-2">
         {Object.entries(data.statistics?.emotion_distribution || {})
           .filter(([_, value]) => value > 0.05)
           .map(([emotion, value]) => (
             <span
               key={emotion}
-              className="text-xs px-2 py-0.5 rounded"
+              className="rounded-full px-2 py-0.5 text-xs"
               style={{
                 backgroundColor: `${emotionColors[emotion]}20`,
                 color: emotionColors[emotion],

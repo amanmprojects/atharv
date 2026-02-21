@@ -284,22 +284,22 @@ export default function Editor() {
   const paragraphCount = plainText.split(/\n\s*\n/).filter(Boolean).length
 
   return (
-    <div className="h-screen flex flex-col">
-      <header className="border-b-4 border-foreground bg-card px-4 py-3">
+    <div className="flex h-screen flex-col bg-editor-bg">
+      <header className="border-b border-panel-border bg-panel-bg px-4 py-3 text-text-main">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link to="/dashboard" className="text-muted-foreground hover:text-foreground">
+            <Link to="/dashboard" className="text-text-secondary transition-colors hover:text-text-main">
               <ArrowLeft className="h-5 w-5" />
             </Link>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="border-none bg-transparent font-heading font-black text-lg w-64 focus-visible:ring-0 uppercase tracking-tight"
+              className="h-9 w-64 border-panel-border bg-panel-surface text-sm font-semibold text-text-main focus-visible:ring-primary/50"
             />
             <select
               value={selectedGenre}
               onChange={(e) => setSelectedGenre(e.target.value)}
-              className="h-8 border-2 border-foreground bg-background px-3 text-xs font-bold uppercase shadow-[2px_2px_0_0_hsl(var(--foreground))]"
+              className="h-9 border-panel-border bg-panel-surface px-3 text-xs font-medium uppercase tracking-[0.08em] text-text-main"
             >
               {genres.map((g) => (
                 <option key={g.id} value={g.id}>{g.label}</option>
@@ -309,24 +309,24 @@ export default function Editor() {
 
           <div className="flex items-center gap-2">
             {/* Module toggles */}
-            <div className="flex items-center gap-1 mr-2">
+            <div className="mr-2 flex items-center gap-1">
               <button
                 onClick={() => setEnableSEO(!enableSEO)}
-                className={`p-1.5 border-2 border-foreground shadow-[1px_1px_0_0_hsl(var(--foreground))] transition-colors ${enableSEO ? 'bg-primary text-primary-foreground' : 'bg-background'}`}
+                className={`rounded-sm border border-panel-border p-1.5 transition-colors ${enableSEO ? 'bg-primary text-primary-foreground' : 'bg-panel-surface text-text-secondary hover:text-text-main'}`}
                 title="SEO Analysis"
               >
                 <Search className="h-3.5 w-3.5" />
               </button>
               <button
                 onClick={() => setEnableAccessibility(!enableAccessibility)}
-                className={`p-1.5 border-2 border-foreground shadow-[1px_1px_0_0_hsl(var(--foreground))] transition-colors ${enableAccessibility ? 'bg-primary text-primary-foreground' : 'bg-background'}`}
+                className={`rounded-sm border border-panel-border p-1.5 transition-colors ${enableAccessibility ? 'bg-primary text-primary-foreground' : 'bg-panel-surface text-text-secondary hover:text-text-main'}`}
                 title="Accessibility Analysis"
               >
                 <Accessibility className="h-3.5 w-3.5" />
               </button>
               <button
                 onClick={() => setEnableKnowledgeGraph(!enableKnowledgeGraph)}
-                className={`p-1.5 border-2 border-foreground shadow-[1px_1px_0_0_hsl(var(--foreground))] transition-colors ${enableKnowledgeGraph ? 'bg-primary text-primary-foreground' : 'bg-background'}`}
+                className={`rounded-sm border border-panel-border p-1.5 transition-colors ${enableKnowledgeGraph ? 'bg-primary text-primary-foreground' : 'bg-panel-surface text-text-secondary hover:text-text-main'}`}
                 title="Knowledge Graph"
               >
                 <Network className="h-3.5 w-3.5" />
@@ -334,17 +334,17 @@ export default function Editor() {
             </div>
 
             <Button onClick={handleAnalyze} disabled={isAnalyzing}
-              className="bg-primary text-primary-foreground font-black uppercase border-2 border-foreground shadow-[3px_3px_0_0_hsl(var(--foreground))] hover:translate-y-0.5 hover:shadow-[1px_1px_0_0_hsl(var(--foreground))] transition-all rounded-none">
+              className="border border-primary/70 bg-primary px-4 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground hover:bg-primary/90">
               {isAnalyzing ? (
                 <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Analyzing...</>
               ) : (
                 <><Play className="h-4 w-4 mr-2" />Analyze</>
               )}
             </Button>
-            <Button variant="outline" size="icon" className="border-2 border-foreground shadow-[2px_2px_0_0_hsl(var(--foreground))] rounded-none">
+            <Button variant="outline" size="icon" className="border-panel-border bg-panel-surface text-text-main hover:bg-panel-hover">
               <Download className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="icon" className="border-2 border-foreground shadow-[2px_2px_0_0_hsl(var(--foreground))] rounded-none">
+            <Button variant="outline" size="icon" className="border-panel-border bg-panel-surface text-text-main hover:bg-panel-hover">
               <Share className="h-4 w-4" />
             </Button>
           </div>
@@ -353,11 +353,11 @@ export default function Editor() {
         {isAnalyzing && <Progress value={50} className="h-1 mt-2" />}
       </header>
 
-      <div className="flex-1 flex overflow-hidden">
-        <div className="flex-1 p-4 relative">
+      <div className="flex flex-1 overflow-hidden">
+        <div className="relative flex-1 p-4">
           {docId && syncStatus !== 'idle' && (
             <div className="absolute top-6 right-6 z-30 pointer-events-none">
-              <div className="px-3 py-1.5 bg-card border-2 border-foreground shadow-[2px_2px_0_0_hsl(var(--foreground))] text-xs font-mono uppercase tracking-wider flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 rounded-sm border border-panel-border bg-panel-bg px-3 py-1.5 text-[11px] uppercase tracking-[0.12em] text-text-secondary">
                 {syncStatus === 'syncing' && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                 {syncStatus === 'synced' && <CheckCircle2 className="h-3.5 w-3.5" />}
                 {syncStatus === 'offline' && <AlertCircle className="h-3.5 w-3.5" />}
@@ -368,10 +368,10 @@ export default function Editor() {
             </div>
           )}
           {isEditorLoading ? (
-            <div className="h-full border-2 border-foreground bg-card shadow-[4px_4px_0_0_hsl(var(--foreground))] flex items-center justify-center">
+            <div className="flex h-full items-center justify-center rounded-md border border-editor-border bg-editor-page shadow-panel">
               <div className="text-center">
                 <Loader2 className="h-10 w-10 animate-spin text-muted-foreground mx-auto mb-3" />
-                <p className="font-mono text-sm text-muted-foreground uppercase tracking-wider">
+                <p className="text-sm text-muted-foreground">
                   Loading document...
                 </p>
               </div>
@@ -389,27 +389,27 @@ export default function Editor() {
               }}
               onSave={docId ? handleSaveContent : undefined}
               isSaving={docSaving}
-              className="h-full overflow-auto font-body text-base leading-relaxed border-2 border-foreground shadow-[4px_4px_0_0_hsl(var(--foreground))]"
+              className="h-full overflow-hidden rounded-md border border-editor-border shadow-panel"
             />
           )}
         </div>
 
-        <div className="w-[420px] border-l-4 border-foreground bg-card flex flex-col min-h-0 overflow-hidden">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 min-h-0 flex flex-col">
-            <TabsList className="mx-4 mt-4 bg-background border-2 border-foreground shadow-[2px_2px_0_0_hsl(var(--foreground))]">
-              <TabsTrigger value="suggestions" className="text-xs font-black uppercase data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Suggestions</TabsTrigger>
-              <TabsTrigger value="narrative" className="text-xs font-black uppercase data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Narrative</TabsTrigger>
-              <TabsTrigger value="style" className="text-xs font-black uppercase data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Style</TabsTrigger>
+        <div className="flex min-h-0 w-[420px] flex-col overflow-hidden border-l border-panel-border bg-panel-bg">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex min-h-0 flex-1 flex-col">
+            <TabsList className="mx-4 mt-4 border-panel-border bg-panel-surface/70">
+              <TabsTrigger value="suggestions" className="text-xs font-semibold uppercase tracking-[0.12em] text-text-secondary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Suggestions</TabsTrigger>
+              <TabsTrigger value="narrative" className="text-xs font-semibold uppercase tracking-[0.12em] text-text-secondary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Narrative</TabsTrigger>
+              <TabsTrigger value="style" className="text-xs font-semibold uppercase tracking-[0.12em] text-text-secondary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Style</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="suggestions" className="flex-1 min-h-0 overflow-auto p-4 scrollbar-thin">
+            <TabsContent value="suggestions" className="scrollbar-thin flex-1 min-h-0 overflow-auto p-4">
               {analysisResult ? (
                 <>
-                  <div className="mb-4 p-3 bg-muted border-2 border-foreground/10">
-                    <p className="text-sm font-black uppercase">
+                  <div className="mb-4 rounded-md border border-panel-border bg-panel-surface/70 p-3">
+                    <p className="text-sm font-semibold uppercase tracking-[0.08em] text-text-main">
                       {analysisResult.suggestions.length} suggestions
                     </p>
-                    <p className="text-xs text-muted-foreground mt-1 font-mono">
+                    <p className="mt-1 text-xs text-text-secondary">
                       {analysisResult.suggestions.filter(s => s.source === 'custom_pipeline').length} custom ·{' '}
                       {analysisResult.suggestions.filter(s => s.source === 'llm_rewrite').length} LLM
                     </p>
@@ -427,24 +427,24 @@ export default function Editor() {
                   </div>
                 </>
               ) : (
-                <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
+                <div className="flex h-full flex-col items-center justify-center text-center text-text-secondary">
                   <AlertCircle className="h-12 w-12 mb-4 opacity-50" />
-                  <p className="text-sm font-bold uppercase">No analysis yet</p>
+                  <p className="text-sm font-semibold uppercase tracking-[0.08em]">No analysis yet</p>
                   <p className="text-xs mt-1">Click "Analyze" to get suggestions</p>
                 </div>
               )}
             </TabsContent>
 
-            <TabsContent value="narrative" className="flex-1 min-h-0 overflow-auto p-4 scrollbar-thin">
+            <TabsContent value="narrative" className="scrollbar-thin flex-1 min-h-0 overflow-auto p-4 text-text-main">
               {analysisResult ? (
                 <>
                   <div className="mb-4">
-                    <h3 className="text-sm font-black uppercase mb-2">Characters ({analysisResult.characters.length})</h3>
+                    <h3 className="mb-2 text-sm font-semibold uppercase tracking-[0.1em] text-text-secondary">Characters ({analysisResult.characters.length})</h3>
                     <div className="space-y-2">
                       {analysisResult.characters.slice(0, 5).map((char) => (
-                        <div key={char.name} className="p-2 bg-muted border-2 border-foreground/10">
-                          <p className="text-sm font-bold">{char.name}</p>
-                          <p className="text-xs text-muted-foreground font-mono">
+                        <div key={char.name} className="rounded-sm border border-panel-border bg-panel-surface/70 p-2">
+                          <p className="text-sm font-semibold text-text-main">{char.name}</p>
+                          <p className="text-xs text-text-secondary">
                             {char.mention_count} mentions
                           </p>
                         </div>
@@ -454,7 +454,7 @@ export default function Editor() {
 
                   {analysisResult.emotional_arc && (
                     <div className="mt-6">
-                      <h3 className="text-sm font-black uppercase mb-2">Emotional Arc</h3>
+                      <h3 className="mb-2 text-sm font-semibold uppercase tracking-[0.1em] text-text-secondary">Emotional Arc</h3>
                       <EmotionalArcChart data={analysisResult.emotional_arc} />
                     </div>
                   )}
@@ -462,28 +462,28 @@ export default function Editor() {
                   {/* Knowledge Graph Summary */}
                   {analysisResult.knowledge_graph && (
                     <div className="mt-6">
-                      <h3 className="text-sm font-black uppercase mb-2 flex items-center gap-2">
+                      <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.1em] text-text-secondary">
                         <Network className="h-4 w-4 text-primary" />
                         Knowledge Graph
                       </h3>
                       <div className="grid grid-cols-3 gap-2 mb-3">
-                        <div className="p-2 bg-muted text-center border border-foreground/10">
-                          <p className="text-lg font-black">{analysisResult.knowledge_graph.entities.length}</p>
-                          <p className="text-[10px] uppercase font-bold text-muted-foreground">Entities</p>
+                        <div className="border border-panel-border bg-panel-surface/70 p-2 text-center">
+                          <p className="text-lg font-semibold text-text-main">{analysisResult.knowledge_graph.entities.length}</p>
+                          <p className="text-[10px] uppercase tracking-[0.08em] text-text-secondary">Entities</p>
                         </div>
-                        <div className="p-2 bg-muted text-center border border-foreground/10">
-                          <p className="text-lg font-black">{analysisResult.knowledge_graph.relationships.length}</p>
-                          <p className="text-[10px] uppercase font-bold text-muted-foreground">Relations</p>
+                        <div className="border border-panel-border bg-panel-surface/70 p-2 text-center">
+                          <p className="text-lg font-semibold text-text-main">{analysisResult.knowledge_graph.relationships.length}</p>
+                          <p className="text-[10px] uppercase tracking-[0.08em] text-text-secondary">Relations</p>
                         </div>
-                        <div className="p-2 bg-muted text-center border border-foreground/10">
-                          <p className="text-lg font-black">{analysisResult.knowledge_graph.events.length}</p>
-                          <p className="text-[10px] uppercase font-bold text-muted-foreground">Events</p>
+                        <div className="border border-panel-border bg-panel-surface/70 p-2 text-center">
+                          <p className="text-lg font-semibold text-text-main">{analysisResult.knowledge_graph.events.length}</p>
+                          <p className="text-[10px] uppercase tracking-[0.08em] text-text-secondary">Events</p>
                         </div>
                       </div>
                       {analysisResult.knowledge_graph.central_entities.length > 0 && (
                         <div className="flex flex-wrap gap-1">
                           {analysisResult.knowledge_graph.central_entities.map((e) => (
-                            <span key={e} className="text-xs bg-primary/10 text-primary px-2 py-0.5 border border-primary/30 font-bold">
+                            <span key={e} className="rounded-full border border-primary/30 bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">
                               {e}
                             </span>
                           ))}
@@ -493,13 +493,13 @@ export default function Editor() {
                   )}
                 </>
               ) : (
-                <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
-                  <p className="text-sm font-bold uppercase">Run analysis to see narrative data</p>
+                <div className="flex h-full flex-col items-center justify-center text-center text-text-secondary">
+                  <p className="text-sm font-semibold uppercase tracking-[0.08em]">Run analysis to see narrative data</p>
                 </div>
               )}
             </TabsContent>
 
-            <TabsContent value="style" className="flex-1 min-h-0 overflow-auto p-4 scrollbar-thin">
+            <TabsContent value="style" className="scrollbar-thin flex-1 min-h-0 overflow-auto p-4 text-text-main">
               {analysisResult ? (
                 <>
                   {analysisResult.style_fingerprint && (
@@ -508,7 +508,7 @@ export default function Editor() {
 
                   {analysisResult.readability_scores && (
                     <div className="mt-6">
-                      <h3 className="text-sm font-black uppercase mb-2">Readability Scores</h3>
+                      <h3 className="mb-2 text-sm font-semibold uppercase tracking-[0.1em] text-text-secondary">Readability Scores</h3>
                       <div className="grid grid-cols-2 gap-2">
                         {[
                           { label: 'Flesch-Kincaid', value: analysisResult.readability_scores.flesch_kincaid },
@@ -516,9 +516,9 @@ export default function Editor() {
                           { label: 'SMOG', value: analysisResult.readability_scores.smog },
                           { label: 'Coleman-Liau', value: analysisResult.readability_scores.coleman_liau },
                         ].map((s) => (
-                          <div key={s.label} className="p-2 bg-muted border border-foreground/10">
-                            <p className="text-[10px] text-muted-foreground font-bold uppercase">{s.label}</p>
-                            <p className="text-lg font-black">{s.value}</p>
+                          <div key={s.label} className="border border-panel-border bg-panel-surface/70 p-2">
+                            <p className="text-[10px] uppercase tracking-[0.08em] text-text-secondary">{s.label}</p>
+                            <p className="text-lg font-semibold text-text-main">{s.value}</p>
                           </div>
                         ))}
                       </div>
@@ -526,11 +526,11 @@ export default function Editor() {
                   )}
 
                   <div className="mt-6">
-                    <h3 className="text-sm font-black uppercase mb-2">Style Transform</h3>
+                    <h3 className="mb-2 text-sm font-semibold uppercase tracking-[0.1em] text-text-secondary">Style Transform</h3>
                     <select
                       value={styleMode}
                       onChange={(e) => setStyleMode(e.target.value)}
-                      className="w-full h-9 border-2 border-foreground bg-background px-3 text-xs font-bold uppercase shadow-[2px_2px_0_0_hsl(var(--foreground))] mb-3"
+                      className="mb-3 h-9 w-full border-panel-border bg-panel-surface px-3 text-xs font-medium uppercase tracking-[0.08em] text-text-main"
                     >
                       {styleModes.map((m) => (
                         <option key={m.id} value={m.id}>{m.label}</option>
@@ -538,16 +538,16 @@ export default function Editor() {
                     </select>
 
                     <div className="mb-3">
-                      <label className="text-xs text-muted-foreground font-bold uppercase">Intensity</label>
+                      <label className="text-xs font-medium uppercase tracking-[0.08em] text-text-secondary">Intensity</label>
                       <Slider value={intensity} onValueChange={setIntensity} max={1} step={0.1} className="mt-2" />
-                      <p className="text-xs text-muted-foreground font-mono mt-1 text-right">{(intensity[0] * 100).toFixed(0)}%</p>
+                      <p className="mt-1 text-right text-xs text-text-secondary">{(intensity[0] * 100).toFixed(0)}%</p>
                     </div>
 
                     <Button
                       variant="outline"
                       onClick={handleTransformStyle}
                       disabled={isTransforming}
-                      className="w-full border-2 border-foreground shadow-[3px_3px_0_0_hsl(var(--foreground))] font-black uppercase rounded-none hover:bg-primary hover:text-primary-foreground transition-all"
+                      className="w-full border-panel-border bg-panel-surface text-xs font-semibold uppercase tracking-[0.08em] text-text-main hover:bg-primary hover:text-primary-foreground"
                     >
                       {isTransforming ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Wand2 className="h-4 w-4 mr-2" />}
                       Transform Style
@@ -557,26 +557,26 @@ export default function Editor() {
                   {/* SEO Summary (if enabled) */}
                   {analysisResult.seo_analysis && (
                     <div className="mt-6">
-                      <h3 className="text-sm font-black uppercase mb-2 flex items-center gap-2">
+                      <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.1em] text-text-secondary">
                         <Search className="h-4 w-4 text-primary" />
                         SEO Score
                       </h3>
-                      <div className={`text-4xl font-black ${analysisResult.seo_analysis.overall_score >= 80 ? 'text-green-500' :
+                      <div className={`text-4xl font-semibold ${analysisResult.seo_analysis.overall_score >= 80 ? 'text-green-500' :
                         analysisResult.seo_analysis.overall_score >= 50 ? 'text-yellow-500' : 'text-red-500'
                         }`}>
                         {analysisResult.seo_analysis.overall_score}
                       </div>
                       <div className="space-y-1 mt-2">
                         {analysisResult.seo_analysis.recommendations.slice(0, 3).map((r, i) => (
-                          <p key={i} className="text-xs">{r}</p>
+                          <p key={i} className="text-xs text-text-secondary">{r}</p>
                         ))}
                       </div>
                     </div>
                   )}
                 </>
               ) : (
-                <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
-                  <p className="text-sm font-bold uppercase">Run analysis to see style data</p>
+                <div className="flex h-full flex-col items-center justify-center text-center text-text-secondary">
+                  <p className="text-sm font-semibold uppercase tracking-[0.08em]">Run analysis to see style data</p>
                 </div>
               )}
             </TabsContent>
@@ -584,7 +584,7 @@ export default function Editor() {
         </div>
       </div>
 
-      <footer className="border-t-4 border-foreground bg-card px-4 py-2 flex items-center gap-6 text-xs text-muted-foreground font-mono">
+      <footer className="flex items-center gap-6 border-t border-panel-border bg-panel-bg px-4 py-2 text-xs text-text-secondary">
         <span>{wordCount.toLocaleString()} words</span>
         <span>{sentenceCount} sentences</span>
         <span>{paragraphCount} paragraphs</span>

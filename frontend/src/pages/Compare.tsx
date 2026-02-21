@@ -39,33 +39,33 @@ export default function Compare() {
 
   return (
     <div className="p-6 lg:p-12 max-w-7xl mx-auto space-y-8">
-      <div className="pb-6 border-b-4 border-foreground">
-        <h1 className="text-5xl md:text-6xl font-heading font-black tracking-tighter uppercase leading-none flex items-center gap-4">
+      <div className="pb-6 border-b border-border">
+        <h1 className="text-5xl md:text-6xl font-heading font-semibold tracking-tighter uppercase leading-none flex items-center gap-4">
           <GitCompare className="h-10 w-10 text-primary" strokeWidth={3} />
           Compare Drafts
         </h1>
-        <p className="text-muted-foreground font-mono text-sm mt-3 uppercase tracking-widest">
+        <p className="text-muted-foreground text-sm mt-3 uppercase tracking-widest">
           Quantify improvement across revisions
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <label className="text-xs font-black uppercase tracking-widest">Original Draft</label>
+          <label className="text-xs font-semibold uppercase tracking-widest">Original Draft</label>
           <Textarea
             value={textA}
             onChange={(e) => setTextA(e.target.value)}
             placeholder="Paste your original text here..."
-            className="h-56 resize-none border-2 border-foreground shadow-[4px_4px_0_0_hsl(var(--foreground))]"
+            className="h-56 resize-none border border-border shadow-sm"
           />
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-black uppercase tracking-widest">Revised Draft</label>
+          <label className="text-xs font-semibold uppercase tracking-widest">Revised Draft</label>
           <Textarea
             value={textB}
             onChange={(e) => setTextB(e.target.value)}
             placeholder="Paste your revised text here..."
-            className="h-56 resize-none border-2 border-foreground shadow-[4px_4px_0_0_hsl(var(--foreground))]"
+            className="h-56 resize-none border border-border shadow-sm"
           />
         </div>
       </div>
@@ -74,7 +74,7 @@ export default function Compare() {
         <Button
           onClick={handleCompare}
           disabled={isComparing}
-          className="bg-primary text-primary-foreground px-12 py-6 font-black text-lg uppercase border-2 border-foreground shadow-[6px_6px_0_0_hsl(var(--foreground))] hover:translate-y-1 hover:shadow-[3px_3px_0_0_hsl(var(--foreground))] transition-all rounded-none"
+          className="bg-primary text-primary-foreground px-12 py-6 font-semibold text-lg uppercase border border-border shadow-sm hover:translate-y-1 hover:shadow-sm transition-all rounded-md"
         >
           {isComparing ? <Loader2 className="h-5 w-5 animate-spin mr-3" /> : <GitCompare className="h-5 w-5 mr-3" />}
           Compare Drafts
@@ -84,11 +84,11 @@ export default function Compare() {
       {result && (
         <div className="space-y-8">
           {/* Summary */}
-          <div className="bg-card border-4 border-foreground p-8 shadow-[8px_8px_0_0_hsl(var(--foreground))]">
+          <div className="bg-card border border-border p-8 shadow-sm">
             <div className="flex flex-col md:flex-row items-center gap-8">
               <div className="text-center">
-                <p className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-1">Improvement Score</p>
-                <p className={`text-8xl font-black tracking-tighter ${result.improvement_score.overall >= 70 ? 'text-green-500' :
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">Improvement Score</p>
+                <p className={`text-8xl font-semibold tracking-tighter ${result.improvement_score.overall >= 70 ? 'text-green-500' :
                     result.improvement_score.overall >= 50 ? 'text-yellow-500' : 'text-red-500'
                   }`}>{result.improvement_score.overall}</p>
               </div>
@@ -96,9 +96,9 @@ export default function Compare() {
                 <p className="text-lg font-bold mb-4">{result.summary}</p>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                   {Object.entries(result.improvement_score.breakdown).map(([key, value]) => (
-                    <div key={key} className="p-3 bg-muted border-2 border-foreground/10">
+                    <div key={key} className="p-3 bg-muted border border-border/40">
                       <p className="text-[10px] font-bold uppercase text-muted-foreground">{key.replace(/_/g, ' ')}</p>
-                      <p className="text-2xl font-black">{value}</p>
+                      <p className="text-2xl font-semibold">{value}</p>
                       <Progress value={value} className="h-1.5 mt-1" />
                     </div>
                   ))}
@@ -109,52 +109,52 @@ export default function Compare() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Word Stats */}
-            <div className="bg-card border-2 border-foreground p-6 shadow-[4px_4px_0_0_hsl(var(--foreground))]">
-              <h3 className="font-black uppercase text-sm tracking-tight pb-2 border-b-2 border-foreground/20 mb-4 flex items-center gap-2">
+            <div className="bg-card border border-border p-6 shadow-sm">
+              <h3 className="font-semibold uppercase text-sm tracking-tight pb-2 border-b border-border/40 mb-4 flex items-center gap-2">
                 <BarChart3 className="h-4 w-4 text-primary" />
                 Word Statistics
               </h3>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-xs font-bold">Original</span>
-                  <span className="font-mono">{result.word_stats.word_count_original} words</span>
+                  <span className="text-sm">{result.word_stats.word_count_original} words</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-xs font-bold">Revised</span>
-                  <span className="font-mono">{result.word_stats.word_count_modified} words</span>
+                  <span className="text-sm">{result.word_stats.word_count_modified} words</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-xs font-bold">Change</span>
                   <div className="flex items-center gap-1">
                     {getDeltaIcon(result.word_stats.word_count_delta)}
-                    <span className="font-mono">{result.word_stats.word_count_change_pct}%</span>
+                    <span className="text-sm">{result.word_stats.word_count_change_pct}%</span>
                   </div>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-xs font-bold">Similarity</span>
-                  <span className="font-mono">{(result.word_stats.overall_similarity * 100).toFixed(1)}%</span>
+                  <span className="text-sm">{(result.word_stats.overall_similarity * 100).toFixed(1)}%</span>
                 </div>
                 <Progress value={result.word_stats.overall_similarity * 100} className="h-2" />
               </div>
             </div>
 
             {/* Structural Diff */}
-            <div className="bg-card border-2 border-foreground p-6 shadow-[4px_4px_0_0_hsl(var(--foreground))]">
-              <h3 className="font-black uppercase text-sm tracking-tight pb-2 border-b-2 border-foreground/20 mb-4">
+            <div className="bg-card border border-border p-6 shadow-sm">
+              <h3 className="font-semibold uppercase text-sm tracking-tight pb-2 border-b border-border/40 mb-4">
                 Structural Changes
               </h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-xs font-bold">Paragraphs Added</span>
-                  <span className="font-mono text-green-500">+{result.structural_diff.paragraphs_added}</span>
+                  <span className="text-sm text-green-500">+{result.structural_diff.paragraphs_added}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-xs font-bold">Paragraphs Deleted</span>
-                  <span className="font-mono text-red-500">-{result.structural_diff.paragraphs_deleted}</span>
+                  <span className="text-sm text-red-500">-{result.structural_diff.paragraphs_deleted}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-xs font-bold">Reordered</span>
-                  <span className={`font-mono ${result.structural_diff.reordered ? 'text-yellow-500' : 'text-muted-foreground'}`}>
+                  <span className={`text-sm ${result.structural_diff.reordered ? 'text-yellow-500' : 'text-muted-foreground'}`}>
                     {result.structural_diff.reordered ? 'Yes' : 'No'}
                   </span>
                 </div>
@@ -162,8 +162,8 @@ export default function Compare() {
             </div>
 
             {/* Readability Delta */}
-            <div className="bg-card border-2 border-foreground p-6 shadow-[4px_4px_0_0_hsl(var(--foreground))]">
-              <h3 className="font-black uppercase text-sm tracking-tight pb-2 border-b-2 border-foreground/20 mb-4">
+            <div className="bg-card border border-border p-6 shadow-sm">
+              <h3 className="font-semibold uppercase text-sm tracking-tight pb-2 border-b border-border/40 mb-4">
                 Readability
               </h3>
               <div className={`p-4 border-2 mb-4 ${result.readability_delta.readability_improved ? 'border-green-500 bg-green-500/10' : 'border-red-500 bg-red-500/10'
@@ -178,7 +178,7 @@ export default function Compare() {
                     <span className="text-xs font-bold capitalize">{key.replace(/_/g, ' ')}</span>
                     <div className="flex items-center gap-1">
                       {getDeltaIcon(value)}
-                      <span className="font-mono text-sm">{value > 0 ? '+' : ''}{value}</span>
+                      <span className="text-sm">{value > 0 ? '+' : ''}{value}</span>
                     </div>
                   </div>
                 ))}
@@ -186,8 +186,8 @@ export default function Compare() {
             </div>
 
             {/* Vocabulary Changes */}
-            <div className="md:col-span-2 lg:col-span-3 bg-card border-2 border-foreground p-6 shadow-[4px_4px_0_0_hsl(var(--foreground))]">
-              <h3 className="font-black uppercase text-sm tracking-tight pb-2 border-b-2 border-foreground/20 mb-4">
+            <div className="md:col-span-2 lg:col-span-3 bg-card border border-border p-6 shadow-sm">
+              <h3 className="font-semibold uppercase text-sm tracking-tight pb-2 border-b border-border/40 mb-4">
                 Vocabulary Changes
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -232,8 +232,8 @@ export default function Compare() {
             </div>
 
             {/* Sentence Diff */}
-            <div className="md:col-span-2 lg:col-span-3 bg-card border-2 border-foreground p-6 shadow-[4px_4px_0_0_hsl(var(--foreground))]">
-              <h3 className="font-black uppercase text-sm tracking-tight pb-2 border-b-2 border-foreground/20 mb-4">
+            <div className="md:col-span-2 lg:col-span-3 bg-card border border-border p-6 shadow-sm">
+              <h3 className="font-semibold uppercase text-sm tracking-tight pb-2 border-b border-border/40 mb-4">
                 Sentence-Level Diff
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
@@ -246,7 +246,7 @@ export default function Compare() {
                 ].map((s) => (
                   <div key={s.label} className="p-3 bg-muted text-center">
                     <p className="text-[10px] font-bold uppercase text-muted-foreground">{s.label}</p>
-                    <p className={`text-2xl font-black ${s.color || ''}`}>{s.value}</p>
+                    <p className={`text-2xl font-semibold ${s.color || ''}`}>{s.value}</p>
                   </div>
                 ))}
               </div>

@@ -41,13 +41,13 @@ export default function SEOPage() {
 
     return (
         <div className="p-6 lg:p-12 max-w-7xl mx-auto space-y-8">
-            <div className="flex items-end justify-between gap-6 pb-6 border-b-4 border-foreground">
+            <div className="flex items-end justify-between gap-6 pb-6 border-b border-border">
                 <div>
-                    <h1 className="text-5xl md:text-6xl font-heading font-black tracking-tighter uppercase leading-none flex items-center gap-4">
+                    <h1 className="text-5xl md:text-6xl font-heading font-semibold tracking-tighter uppercase leading-none flex items-center gap-4">
                         <Search className="h-10 w-10 text-primary" strokeWidth={3} />
                         SEO Optimizer
                     </h1>
-                    <p className="text-muted-foreground font-mono text-sm mt-3 uppercase tracking-widest">
+                    <p className="text-muted-foreground text-sm mt-3 uppercase tracking-widest">
                         Intelligent SEO scoring, not keyword stuffing
                     </p>
                 </div>
@@ -59,19 +59,19 @@ export default function SEOPage() {
                         value={text}
                         onChange={(e) => setText(e.target.value)}
                         placeholder="Paste your content here for SEO analysis..."
-                        className="h-64 resize-none border-2 border-foreground shadow-[4px_4px_0_0_hsl(var(--foreground))] font-body text-base"
+                        className="h-64 resize-none border border-border shadow-sm font-body text-base"
                     />
                     <div className="flex gap-4">
                         <Input
                             value={keywords}
                             onChange={(e) => setKeywords(e.target.value)}
                             placeholder="Target keywords (comma-separated)..."
-                            className="flex-1 border-2 border-foreground shadow-[2px_2px_0_0_hsl(var(--foreground))]"
+                            className="flex-1 border border-border shadow-sm"
                         />
                         <Button
                             onClick={handleAnalyze}
                             disabled={isAnalyzing}
-                            className="bg-primary text-primary-foreground px-8 font-black uppercase border-2 border-foreground shadow-[4px_4px_0_0_hsl(var(--foreground))] hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_hsl(var(--foreground))] transition-all rounded-none"
+                            className="bg-primary text-primary-foreground px-8 font-semibold uppercase border border-border shadow-sm hover:translate-y-0.5 hover:shadow-sm transition-all rounded-md"
                         >
                             {isAnalyzing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Search className="h-4 w-4 mr-2" />}
                             Analyze SEO
@@ -80,30 +80,30 @@ export default function SEOPage() {
                 </div>
 
                 {result && (
-                    <div className="bg-card border-4 border-foreground p-6 shadow-[8px_8px_0_0_hsl(var(--foreground))]">
-                        <h3 className="text-sm font-black uppercase tracking-widest mb-4">Overall Score</h3>
-                        <div className={`text-7xl font-black tracking-tighter ${getScoreColor(result.overall_score)}`}>
+                    <div className="bg-card border border-border p-6 shadow-sm">
+                        <h3 className="text-sm font-semibold uppercase tracking-widest mb-4">Overall Score</h3>
+                        <div className={`text-7xl font-semibold tracking-tighter ${getScoreColor(result.overall_score)}`}>
                             {result.overall_score}
                         </div>
-                        <p className="text-xs font-mono uppercase text-muted-foreground mt-1">out of 100</p>
+                        <p className="text-xs uppercase text-muted-foreground mt-1">out of 100</p>
                         <Progress value={result.overall_score} className="h-3 mt-4" />
 
                         <div className="mt-6 space-y-3">
                             <div className="flex justify-between text-sm">
                                 <span className="font-bold uppercase text-xs">Keywords</span>
-                                <span className={`font-black ${getScoreColor(result.keyword_analysis.keyword_score)}`}>
+                                <span className={`font-semibold ${getScoreColor(result.keyword_analysis.keyword_score)}`}>
                                     {result.keyword_analysis.keyword_score}
                                 </span>
                             </div>
                             <div className="flex justify-between text-sm">
                                 <span className="font-bold uppercase text-xs">Headings</span>
-                                <span className={`font-black ${getScoreColor(result.heading_analysis.heading_score)}`}>
+                                <span className={`font-semibold ${getScoreColor(result.heading_analysis.heading_score)}`}>
                                     {result.heading_analysis.heading_score}
                                 </span>
                             </div>
                             <div className="flex justify-between text-sm">
                                 <span className="font-bold uppercase text-xs">Content</span>
-                                <span className={`font-black ${getScoreColor(result.content_analysis.content_score)}`}>
+                                <span className={`font-semibold ${getScoreColor(result.content_analysis.content_score)}`}>
                                     {result.content_analysis.content_score}
                                 </span>
                             </div>
@@ -115,17 +115,17 @@ export default function SEOPage() {
             {result && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {/* Keywords */}
-                    <div className="bg-card border-2 border-foreground p-6 shadow-[4px_4px_0_0_hsl(var(--foreground))]">
-                        <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-foreground/20">
+                    <div className="bg-card border border-border p-6 shadow-sm">
+                        <div className="flex items-center gap-2 mb-4 pb-2 border-b border-border/40">
                             <Hash className="h-5 w-5 text-primary" strokeWidth={2.5} />
-                            <h3 className="font-black uppercase text-sm tracking-tight">Keyword Analysis</h3>
+                            <h3 className="font-semibold uppercase text-sm tracking-tight">Keyword Analysis</h3>
                         </div>
                         <div className="space-y-3">
                             {Object.entries(result.keyword_analysis.keyword_data).slice(0, 5).map(([kw, data]) => (
                                 <div key={kw} className="flex items-center justify-between">
                                     <span className="text-sm font-bold truncate mr-2">{kw}</span>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-xs font-mono">{(data.density * 100).toFixed(1)}%</span>
+                                        <span className="text-xs">{(data.density * 100).toFixed(1)}%</span>
                                         {data.in_ideal_range ? (
                                             <CheckCircle2 className="h-4 w-4 text-green-500" />
                                         ) : (
@@ -138,14 +138,14 @@ export default function SEOPage() {
                     </div>
 
                     {/* Issues */}
-                    <div className="bg-card border-2 border-foreground p-6 shadow-[4px_4px_0_0_hsl(var(--foreground))]">
-                        <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-foreground/20">
+                    <div className="bg-card border border-border p-6 shadow-sm">
+                        <div className="flex items-center gap-2 mb-4 pb-2 border-b border-border/40">
                             <AlertTriangle className="h-5 w-5 text-primary" strokeWidth={2.5} />
-                            <h3 className="font-black uppercase text-sm tracking-tight">Issues ({result.issues.length})</h3>
+                            <h3 className="font-semibold uppercase text-sm tracking-tight">Issues ({result.issues.length})</h3>
                         </div>
                         <div className="space-y-3">
                             {result.issues.slice(0, 5).map((issue, i) => (
-                                <div key={i} className="p-3 bg-muted border-2 border-foreground/10">
+                                <div key={i} className="p-3 bg-muted border border-border/40">
                                     <div className="flex items-center gap-2 mb-1">
                                         <span className={`text-[10px] px-2 py-0.5 font-bold uppercase ${issue.severity === 'high' ? 'bg-red-500 text-white' :
                                                 issue.severity === 'medium' ? 'bg-yellow-500 text-black' :
@@ -159,10 +159,10 @@ export default function SEOPage() {
                     </div>
 
                     {/* Recommendations */}
-                    <div className="bg-card border-2 border-foreground p-6 shadow-[4px_4px_0_0_hsl(var(--foreground))]">
-                        <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-foreground/20">
+                    <div className="bg-card border border-border p-6 shadow-sm">
+                        <div className="flex items-center gap-2 mb-4 pb-2 border-b border-border/40">
                             <Target className="h-5 w-5 text-primary" strokeWidth={2.5} />
-                            <h3 className="font-black uppercase text-sm tracking-tight">Recommendations</h3>
+                            <h3 className="font-semibold uppercase text-sm tracking-tight">Recommendations</h3>
                         </div>
                         <div className="space-y-2">
                             {result.recommendations.map((rec, i) => (
@@ -172,19 +172,19 @@ export default function SEOPage() {
                     </div>
 
                     {/* Meta Suggestions */}
-                    <div className="md:col-span-2 lg:col-span-3 bg-card border-2 border-foreground p-6 shadow-[4px_4px_0_0_hsl(var(--foreground))]">
-                        <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-foreground/20">
+                    <div className="md:col-span-2 lg:col-span-3 bg-card border border-border p-6 shadow-sm">
+                        <div className="flex items-center gap-2 mb-4 pb-2 border-b border-border/40">
                             <FileText className="h-5 w-5 text-primary" strokeWidth={2.5} />
-                            <h3 className="font-black uppercase text-sm tracking-tight">Meta Tag Suggestions</h3>
+                            <h3 className="font-semibold uppercase text-sm tracking-tight">Meta Tag Suggestions</h3>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Title Tag ({result.meta_suggestions.title_length} chars)</label>
-                                <p className="mt-1 p-3 bg-muted border-2 border-foreground/10 text-sm font-medium">{result.meta_suggestions.suggested_title}</p>
+                                <p className="mt-1 p-3 bg-muted border border-border/40 text-sm font-medium">{result.meta_suggestions.suggested_title}</p>
                             </div>
                             <div>
                                 <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Meta Description ({result.meta_suggestions.meta_description_length} chars)</label>
-                                <p className="mt-1 p-3 bg-muted border-2 border-foreground/10 text-sm">{result.meta_suggestions.suggested_meta_description}</p>
+                                <p className="mt-1 p-3 bg-muted border border-border/40 text-sm">{result.meta_suggestions.suggested_meta_description}</p>
                             </div>
                         </div>
                     </div>

@@ -11,7 +11,7 @@ import {
   Search,
   Accessibility,
   Fingerprint,
-  ShieldCheck
+  ShieldCheck,
 } from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
 import { Button } from '@/components/ui/button'
@@ -41,72 +41,80 @@ export default function Sidebar() {
   const { theme, toggleTheme, genre, setGenre } = useAppStore()
 
   return (
-    <aside className="w-64 border-r-4 border-foreground bg-card flex flex-col font-mono">
-      <div className="p-6 border-b-4 border-foreground">
-        <div className="flex items-center gap-3">
-          <div className="bg-primary text-primary-foreground p-1.5 shadow-[2px_2px_0_0_hsl(var(--foreground))]">
-            <BookOpen className="h-6 w-6" strokeWidth={3} />
+    <aside className="w-72 border-r border-panel-border bg-panel-bg text-text-secondary shadow-panel">
+      <div className="flex h-full flex-col">
+        <div className="border-b border-panel-border px-5 py-5">
+          <div className="flex items-center gap-3">
+            <div className="rounded-md bg-primary p-2 text-primary-foreground shadow-sm">
+              <BookOpen className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-lg font-bold tracking-tight text-text-main">ScriptIQ</p>
+              <p className="text-xs uppercase tracking-[0.16em] text-text-muted">
+                Writing Workspace
+              </p>
+            </div>
           </div>
-          <span className="font-heading font-black tracking-tighter text-2xl uppercase">ScriptIQ</span>
         </div>
-      </div>
 
-      <nav className="flex-1 p-4 space-y-6 overflow-auto scrollbar-thin">
-        <ul className="space-y-1.5">
-          {navItems.map((item) => (
-            <li key={item.to}>
-              <NavLink
-                to={item.to}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2.5 text-xs font-bold tracking-tight uppercase border-2 transition-all shadow-[2px_2px_0_0_hsl(var(--foreground))] hover:translate-x-0.5 ${isActive
-                    ? 'bg-primary text-primary-foreground border-foreground'
-                    : 'bg-background border-foreground text-foreground hover:bg-foreground hover:text-background'
-                  }`
-                }
-              >
-                <item.icon className="h-4 w-4 flex-shrink-0" strokeWidth={2.5} />
-                {item.label}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
-
-        <div className="pt-4 border-t-4 border-foreground space-y-3">
-          <label className="text-xs font-black uppercase tracking-widest text-foreground block">
-            Default Genre
-          </label>
-          <select
-            value={genre}
-            onChange={(e) => setGenre(e.target.value)}
-            className="w-full h-10 px-3 border-2 border-foreground bg-background text-foreground font-bold uppercase text-xs shadow-[2px_2px_0_0_hsl(var(--foreground))] outline-none focus:ring-0 focus:border-primary transition-colors cursor-pointer"
-          >
-            {genres.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.label}
-              </option>
+        <nav className="scrollbar-thin flex-1 space-y-6 overflow-auto px-4 py-5">
+          <ul className="space-y-1.5">
+            {navItems.map((item) => (
+              <li key={item.to}>
+                <NavLink
+                  to={item.to}
+                  className={({ isActive }) =>
+                    `group flex items-center gap-3 rounded-md border px-3 py-2.5 text-sm transition-colors ${
+                      isActive
+                        ? 'border-primary/60 bg-panel-hover text-text-main'
+                        : 'border-transparent text-text-secondary hover:border-panel-border hover:bg-panel-surface hover:text-text-main'
+                    }`
+                  }
+                >
+                  <item.icon className="h-4 w-4 flex-shrink-0" />
+                  <span>{item.label}</span>
+                </NavLink>
+              </li>
             ))}
-          </select>
-        </div>
-      </nav>
+          </ul>
 
-      <div className="p-4 border-t-4 border-foreground">
-        <Button
-          variant="outline"
-          onClick={toggleTheme}
-          className="w-full justify-start gap-3 border-2 border-foreground bg-background text-foreground hover:bg-foreground hover:text-background font-bold tracking-tight uppercase shadow-[2px_2px_0_0_hsl(var(--foreground))] rounded-none h-10 text-xs"
-        >
-          {theme === 'light' ? (
-            <>
-              <Moon className="h-4 w-4" strokeWidth={2.5} />
-              Dark Mode
-            </>
-          ) : (
-            <>
-              <Sun className="h-4 w-4" strokeWidth={2.5} />
-              Light Mode
-            </>
-          )}
-        </Button>
+          <div className="space-y-2 border-t border-panel-border pt-5">
+            <label className="block text-xs uppercase tracking-[0.16em] text-text-muted">
+              Default Genre
+            </label>
+            <select
+              value={genre}
+              onChange={(e) => setGenre(e.target.value)}
+              className="h-10 w-full border-panel-border bg-panel-surface px-3 text-sm text-text-main outline-none transition-colors focus:border-primary"
+            >
+              {genres.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </nav>
+
+        <div className="border-t border-panel-border p-4">
+          <Button
+            variant="outline"
+            onClick={toggleTheme}
+            className="w-full justify-start gap-3 border-panel-border bg-panel-surface text-text-main hover:bg-panel-hover hover:text-text-main"
+          >
+            {theme === 'light' ? (
+              <>
+                <Moon className="h-4 w-4" />
+                Dark Mode
+              </>
+            ) : (
+              <>
+                <Sun className="h-4 w-4" />
+                Light Mode
+              </>
+            )}
+          </Button>
+        </div>
       </div>
     </aside>
   )

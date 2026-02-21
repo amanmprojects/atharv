@@ -60,12 +60,12 @@ export default function AdminDashboard() {
 
     return (
         <div className="p-6 lg:p-12 max-w-7xl mx-auto space-y-8">
-            <div className="pb-6 border-b-4 border-foreground">
-                <h1 className="text-5xl md:text-6xl font-heading font-black tracking-tighter uppercase leading-none flex items-center gap-4">
+            <div className="pb-6 border-b border-border">
+                <h1 className="text-5xl md:text-6xl font-heading font-semibold tracking-tighter uppercase leading-none flex items-center gap-4">
                     <ShieldCheck className="h-10 w-10 text-primary" strokeWidth={3} />
                     Admin Dashboard
                 </h1>
-                <p className="text-muted-foreground font-mono text-sm mt-3 uppercase tracking-widest">
+                <p className="text-muted-foreground text-sm mt-3 uppercase tracking-widest">
                     System intelligence · Rule analytics · Model performance
                 </p>
             </div>
@@ -78,22 +78,22 @@ export default function AdminDashboard() {
                     { label: 'Acceptance Rate', value: `${stats.acceptance_rate}%`, icon: TrendingUp, color: 'text-green-500' },
                     { label: 'Avg Processing', value: `${stats.avg_processing_time_ms}ms`, icon: Clock, color: 'text-purple-500' },
                 ].map((metric) => (
-                    <div key={metric.label} className="bg-card border-2 border-foreground p-5 shadow-[4px_4px_0_0_hsl(var(--foreground))] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_hsl(var(--foreground))] transition-all">
-                        <div className="flex items-center justify-between border-b-2 border-foreground/10 pb-2 mb-3">
-                            <span className="text-foreground/70 font-mono text-[10px] uppercase tracking-wider">{metric.label}</span>
+                    <div key={metric.label} className="bg-card border border-border p-5 shadow-sm hover:-translate-y-1 hover:shadow-sm transition-all">
+                        <div className="flex items-center justify-between border-b border-border/30 pb-2 mb-3">
+                            <span className="text-[10px] uppercase tracking-wider text-foreground/70">{metric.label}</span>
                             <metric.icon className={`h-5 w-5 ${metric.color}`} />
                         </div>
-                        <p className="text-3xl md:text-4xl font-black tracking-tighter">{metric.value}</p>
+                        <p className="text-3xl md:text-4xl font-semibold tracking-tighter">{metric.value}</p>
                     </div>
                 ))}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Rule Trigger Frequency */}
-                <div className="bg-card border-2 border-foreground p-6 shadow-[4px_4px_0_0_hsl(var(--foreground))]">
-                    <div className="flex items-center gap-2 mb-6 pb-2 border-b-2 border-foreground">
+                <div className="bg-card border border-border p-6 shadow-sm">
+                    <div className="flex items-center gap-2 mb-6 pb-2 border-b border-border">
                         <BarChart3 className="h-5 w-5 text-primary" />
-                        <h2 className="font-black uppercase text-sm tracking-tight">Rule Trigger Frequency</h2>
+                        <h2 className="font-semibold uppercase text-sm tracking-tight">Rule Trigger Frequency</h2>
                     </div>
                     <div className="space-y-3">
                         {topRules.map(([rule, count]) => {
@@ -111,9 +111,9 @@ export default function AdminDashboard() {
                                                 }`}>{category}</span>
                                             <span className="text-xs font-bold capitalize">{ruleName}</span>
                                         </div>
-                                        <span className="text-sm font-black">{count}</span>
+                                        <span className="text-sm font-semibold">{count}</span>
                                     </div>
-                                    <div className="h-3 bg-muted border border-foreground/10 overflow-hidden">
+                                    <div className="h-3 bg-muted border border-border/35 overflow-hidden">
                                         <div
                                             className={`h-full transition-all ${category === 'narrative' ? 'bg-blue-500' :
                                                     category === 'structural' ? 'bg-purple-500' :
@@ -130,26 +130,26 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Suggestion Stats */}
-                <div className="bg-card border-2 border-foreground p-6 shadow-[4px_4px_0_0_hsl(var(--foreground))]">
-                    <div className="flex items-center gap-2 mb-6 pb-2 border-b-2 border-foreground">
+                <div className="bg-card border border-border p-6 shadow-sm">
+                    <div className="flex items-center gap-2 mb-6 pb-2 border-b border-border">
                         <TrendingUp className="h-5 w-5 text-primary" />
-                        <h2 className="font-black uppercase text-sm tracking-tight">Suggestion Analytics</h2>
+                        <h2 className="font-semibold uppercase text-sm tracking-tight">Suggestion Analytics</h2>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 mb-6">
-                        <div className="p-4 bg-green-500/10 border-2 border-green-500/30">
+                        <div className="border border-green-500/30 bg-green-500/10 p-4 rounded-md">
                             <div className="flex items-center gap-2 mb-1">
                                 <CheckCircle2 className="h-4 w-4 text-green-500" />
                                 <span className="text-xs font-bold uppercase">Accepted</span>
                             </div>
-                            <p className="text-3xl font-black text-green-500">{stats.suggestion_stats.accepted}</p>
+                            <p className="text-3xl font-semibold text-green-500">{stats.suggestion_stats.accepted}</p>
                         </div>
-                        <div className="p-4 bg-red-500/10 border-2 border-red-500/30">
+                        <div className="border border-red-500/30 bg-red-500/10 p-4 rounded-md">
                             <div className="flex items-center gap-2 mb-1">
                                 <XCircle className="h-4 w-4 text-red-500" />
                                 <span className="text-xs font-bold uppercase">Rejected</span>
                             </div>
-                            <p className="text-3xl font-black text-red-500">{stats.suggestion_stats.rejected}</p>
+                            <p className="text-3xl font-semibold text-red-500">{stats.suggestion_stats.rejected}</p>
                         </div>
                     </div>
 
@@ -160,12 +160,12 @@ export default function AdminDashboard() {
                                 <span>{stats.llm_calls_total}</span>
                             </div>
                             <Progress value={(stats.llm_calls_total / Math.max(stats.total_suggestions, 1)) * 100} className="h-3" />
-                            <p className="text-[10px] text-muted-foreground mt-1 font-mono">
+                            <p className="mt-1 text-[10px] text-muted-foreground">
                                 {((stats.llm_calls_total / Math.max(stats.total_suggestions, 1)) * 100).toFixed(1)}% of suggestions used LLM
                             </p>
                         </div>
 
-                        <div className="p-4 bg-primary/10 border-2 border-primary">
+                        <div className="rounded-md border border-primary/40 bg-primary/10 p-4">
                             <p className="text-sm font-bold">
                                 🚀 "{stats.total_suggestions} suggestions generated. Only {stats.llm_calls_total} required an LLM call.
                                 The rest were produced by our custom intelligence pipeline — fully explainable, fully deterministic."
@@ -173,19 +173,19 @@ export default function AdminDashboard() {
                         </div>
 
                         <div>
-                            <h3 className="text-xs font-black uppercase mb-2">Model Performance</h3>
+                            <h3 className="text-xs font-semibold uppercase mb-2">Model Performance</h3>
                             <div className="grid grid-cols-3 gap-2">
                                 <div className="p-2 bg-muted text-center">
                                     <p className="text-[10px] font-bold uppercase text-muted-foreground">Confidence</p>
-                                    <p className="text-lg font-black">75%</p>
+                                    <p className="text-lg font-semibold">75%</p>
                                 </div>
                                 <div className="p-2 bg-muted text-center">
                                     <p className="text-[10px] font-bold uppercase text-muted-foreground">Improvement</p>
-                                    <p className="text-lg font-black">60%</p>
+                                    <p className="text-lg font-semibold">60%</p>
                                 </div>
                                 <div className="p-2 bg-muted text-center">
                                     <p className="text-[10px] font-bold uppercase text-muted-foreground">Custom/LLM</p>
-                                    <p className="text-lg font-black">80/20</p>
+                                    <p className="text-lg font-semibold">80/20</p>
                                 </div>
                             </div>
                         </div>
