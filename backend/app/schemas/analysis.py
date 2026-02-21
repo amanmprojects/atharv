@@ -3,10 +3,12 @@ from pydantic import BaseModel, Field
 from enum import Enum
 from datetime import datetime
 
+
 class SeverityLevel(str, Enum):
     HIGH = "high"
     MEDIUM = "medium"
     LOW = "low"
+
 
 class IssueType(str, Enum):
     CONTRADICTION = "contradiction"
@@ -20,14 +22,17 @@ class IssueType(str, Enum):
     FLAT_EMOTION = "flat_emotion"
     VAGUE_REFERENCE = "vague_reference"
 
+
 class SourceType(str, Enum):
     CUSTOM_PIPELINE = "custom_pipeline"
     LLM_REWRITE = "llm_rewrite"
+
 
 class SuggestionStatus(str, Enum):
     PENDING = "pending"
     ACCEPTED = "accepted"
     REJECTED = "rejected"
+
 
 class CharacterInfo(BaseModel):
     name: str
@@ -36,6 +41,7 @@ class CharacterInfo(BaseModel):
     role: Optional[str] = None
     first_mention_paragraph: int
     mention_count: int
+
 
 class ContradictionIssue(BaseModel):
     entity: str
@@ -46,6 +52,7 @@ class ContradictionIssue(BaseModel):
     confidence: float
     explanation: str
 
+
 class StructuralIssue(BaseModel):
     issue_type: IssueType
     location: dict
@@ -53,6 +60,7 @@ class StructuralIssue(BaseModel):
     score: float
     explanation: str
     suggestion: Optional[str] = None
+
 
 class Suggestion(BaseModel):
     suggestion_id: str
@@ -67,15 +75,18 @@ class Suggestion(BaseModel):
     status: SuggestionStatus = SuggestionStatus.PENDING
     location: Optional[dict] = None
 
+
 class EmotionData(BaseModel):
     paragraph: int
     emotions: dict[str, float]
+
 
 class EmotionalArc(BaseModel):
     arc_shape: str
     flat_zones: List[dict]
     pacing_scores: List[float]
     emotion_timeline: List[EmotionData]
+
 
 class StyleFingerprint(BaseModel):
     sentence_length_mean: float
@@ -88,12 +99,14 @@ class StyleFingerprint(BaseModel):
     rhetorical_question_frequency: float
     paragraph_length_variance: float
 
+
 class ReadabilityScores(BaseModel):
     flesch_kincaid: float
     gunning_fog: float
     coleman_liau: float
     smog: float
     dale_chall: float
+
 
 # --- Knowledge Graph Schemas ---
 class KnowledgeGraphEntity(BaseModel):
@@ -104,6 +117,7 @@ class KnowledgeGraphEntity(BaseModel):
     mentions: List[dict] = []
     attributes: dict = {}
 
+
 class KnowledgeGraphRelationship(BaseModel):
     source: str
     target: str
@@ -112,12 +126,14 @@ class KnowledgeGraphRelationship(BaseModel):
     paragraphs: List[int] = []
     evidence: List[str] = []
 
+
 class KnowledgeGraphEvent(BaseModel):
     description: str
     paragraph: int
     entities_involved: List[str] = []
     temporal_marker: Optional[str] = None
     event_type: str = "general"
+
 
 class KnowledgeGraphResponse(BaseModel):
     entities: List[KnowledgeGraphEntity] = []
@@ -128,10 +144,12 @@ class KnowledgeGraphResponse(BaseModel):
     central_entities: List[str] = []
     graph_stats: Dict[str, Any] = {}
 
+
 # --- SEO Schemas ---
 class SEOAnalysisRequest(BaseModel):
     text: str
     target_keywords: List[str] = []
+
 
 class SEOAnalysisResponse(BaseModel):
     overall_score: float
@@ -142,10 +160,12 @@ class SEOAnalysisResponse(BaseModel):
     recommendations: List[str]
     meta_suggestions: dict
 
+
 # --- Comparative Analysis Schemas ---
 class CompareRequest(BaseModel):
     text_a: str
     text_b: str
+
 
 class CompareResponse(BaseModel):
     structural_diff: dict
@@ -157,9 +177,11 @@ class CompareResponse(BaseModel):
     improvement_score: dict
     summary: str
 
+
 # --- Accessibility Schemas ---
 class AccessibilityRequest(BaseModel):
     text: str
+
 
 class AccessibilityResponse(BaseModel):
     simplification: dict
@@ -170,10 +192,12 @@ class AccessibilityResponse(BaseModel):
     structure_suggestions: dict
     overall_accessibility_score: dict
 
+
 # --- Watermarking Schemas ---
 class WatermarkEmbedRequest(BaseModel):
     text: str
     watermark_id: Optional[str] = None
+
 
 class WatermarkEmbedResponse(BaseModel):
     watermarked_text: str
@@ -185,9 +209,11 @@ class WatermarkEmbedResponse(BaseModel):
     watermarked_length: int
     encoding_success_rate: float
 
+
 class WatermarkDetectRequest(BaseModel):
     text: str
     original_text: Optional[str] = None
+
 
 class WatermarkDetectResponse(BaseModel):
     watermark_detected: bool
@@ -197,9 +223,11 @@ class WatermarkDetectResponse(BaseModel):
     evidence: List[str] = []
     bit_pattern: str = ""
 
+
 class WatermarkVerifyRequest(BaseModel):
     text: str
     claimed_watermark_id: str
+
 
 class WatermarkVerifyResponse(BaseModel):
     verified: bool
@@ -208,6 +236,7 @@ class WatermarkVerifyResponse(BaseModel):
     detected_id: Optional[str] = None
     evidence_count: int
     confidence: float
+
 
 class StylometricSignatureResponse(BaseModel):
     signature_hash: str
@@ -219,13 +248,17 @@ class StylometricSignatureResponse(BaseModel):
     function_word_usage: dict
     hapax_legomena_ratio: float
 
+
 # --- Admin Dashboard Schemas ---
 class AdminAnalyticsEvent(BaseModel):
     event_type: str  # 'analysis', 'transform', 'suggestion_accept', 'suggestion_reject'
     timestamp: str
     details: dict = {}
 
+
 class AdminStatsResponse(BaseModel):
+    model_config = {"protected_namespaces": ()}
+
     total_analyses: int
     total_documents: int
     total_suggestions: int
@@ -235,6 +268,7 @@ class AdminStatsResponse(BaseModel):
     rule_trigger_frequency: Dict[str, int]
     suggestion_stats: dict
     model_performance: dict
+
 
 # --- Original Analysis Schemas (Enhanced) ---
 class AnalysisRequest(BaseModel):
@@ -248,6 +282,7 @@ class AnalysisRequest(BaseModel):
     enable_seo: bool = False
     enable_accessibility: bool = False
     enable_knowledge_graph: bool = False
+
 
 class AnalysisResponse(BaseModel):
     document_id: str
@@ -268,11 +303,13 @@ class AnalysisResponse(BaseModel):
     llm_calls_used: int = 0
     processing_time_ms: float
 
+
 class StyleTransformRequest(BaseModel):
     text: str
     style_mode: str
     intensity: float = Field(0.5, ge=0.0, le=1.0)
     preserve_entities: bool = True
+
 
 class StyleTransformResponse(BaseModel):
     original_text: str
@@ -282,10 +319,12 @@ class StyleTransformResponse(BaseModel):
     meaning_preservation_score: float
     llm_call_used: bool
 
+
 class DocumentCreate(BaseModel):
     title: str
     content: str
     genre: str = "fiction"
+
 
 class Document(BaseModel):
     id: str
