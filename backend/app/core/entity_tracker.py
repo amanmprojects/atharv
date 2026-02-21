@@ -11,6 +11,33 @@ except OSError:
     nlp = None
 
 
+STOPWORDS = {
+    'the', 'a', 'an', 'this', 'that', 'these', 'those',
+    'he', 'she', 'it', 'they', 'we', 'you', 'i',
+    'his', 'her', 'its', 'their', 'our', 'your', 'my',
+    'him', 'them', 'us', 'me',
+    'himself', 'herself', 'itself', 'themselves', 'ourselves', 'yourself', 'myself',
+    'who', 'whom', 'whose', 'which', 'what',
+    'is', 'are', 'was', 'were', 'be', 'been', 'being',
+    'have', 'has', 'had', 'do', 'does', 'did',
+    'will', 'would', 'could', 'should', 'may', 'might', 'must',
+    'can', 'shall', 'ought', 'need', 'dare',
+    'and', 'but', 'or', 'nor', 'for', 'yet', 'so',
+    'if', 'then', 'else', 'when', 'where', 'why', 'how',
+    'all', 'each', 'every', 'both', 'few', 'more', 'most', 'other', 'some',
+    'such', 'no', 'not', 'only', 'own', 'same', 'than', 'too', 'very',
+    'just', 'also', 'now', 'here', 'there', 'always', 'never',
+    'after', 'before', 'above', 'below', 'from', 'up', 'down', 'in', 'out', 'on', 'off', 'over', 'under',
+    'again', 'further', 'once',
+}
+
+KNOWN_LOCATIONS = {
+    'forest', 'village', 'city', 'town', 'mountain', 'river', 'lake', 'sea', 'ocean',
+    'valley', 'island', 'country', 'kingdom', 'castle', 'palace', 'temple', 'tower',
+    'cave', 'desert', 'swamp', 'meadow', 'garden', 'bridge', 'road', 'path',
+}
+
+
 class EntityTracker:
     def __init__(self):
         self.nlp = nlp
@@ -19,54 +46,119 @@ class EntityTracker:
         self.entity_mentions: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
         
     def extract_entities(self, text: str) -> List[Dict[str, Any]]:
-        if not self.nlp:
-            return self._extract_entities_regex(text)
-        
+        if self.nlp:
+            return self._extract_entities_spacy(text)
+        return self._extract_entities_regex(text)
+    
+    def _extract_entities_spacy(self, text: str) -> List[Dict[str, Any]]:
         doc = self.nlp(text)
         entities = []
         
         for ent in doc.ents:
-            entity_type = self._map_entity_type(ent.label_)
-            entity = {
-                "id": str(uuid.uuid4())[:8],
-                "name": ent.text,
-                "entity_type": entity_type,
-                "start": ent.start_char,
-                "end": ent.end_char,
-                "sentence": ent.sent.text if ent.sent else ""
-            }
-            entities.append(entity)
+            if ent.label_ in ("PERSON", "ORG", "GPE", "LOC", "FAC"):
+                if ent.text.lower() in STOPWORDS:
+                    continue
+                entity_type = self._map_entity_type(ent.label_)
+                entity = {
+                    "id": str(uuid.uuid4())[:8],
+                    "name": ent.text,
+                    "entity_type": entity_type,
+                    "start": ent.start_char,
+                    "end": ent.end_char,
+                    "sentence": ent.sent.text if ent.sent else ""
+                }
+                entities.append(entity)
             
         return self._merge_duplicate_entities(entities)
     
     def _extract_entities_regex(self, text: str) -> List[Dict[str, Any]]:
         entities = []
         
-        patterns = {
-            "PERSON": [
-                r'\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\b',
-                r'\b(Mr\.|Mrs\.|Ms\.|Dr\.)\s+([A-Z][a-z]+)\b',
-            ],
-            "LOCATION": [
-                r'\b([A-Z][a-z]+(?:\s+(?:City|Town|Village|Mountain|River|Lake|Sea|Ocean|Forest|Valley))?)\b',
-            ],
-            "DATE": [
-                r'\b(\d{1,2}(?:st|nd|rd|th)?\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)(?:\s+\d{4})?)\b',
-                r'\b((?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}(?:st|nd|rd|th)?(?:,?\s+\d{4})?)\b',
-            ],
-        }
+        person_patterns = [
+            r'\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\b',
+            r'\b(Mr\.|Mrs\.|Ms\.|Dr\.)\s+([A-Z][a-z]+)\b',
+        ]
         
-        for entity_type, pattern_list in patterns.items():
-            for pattern in pattern_list:
-                for match in re.finditer(pattern, text):
-                    entities.append({
-                        "id": str(uuid.uuid4())[:8],
-                        "name": match.group(0),
-                        "entity_type": entity_type.lower(),
-                        "start": match.start(),
-                        "end": match.end(),
-                        "sentence": self._get_sentence(text, match.start())
-                    })
+        for pattern in person_patterns:
+            for match in re.finditer(pattern, text):
+                name = match.group(0)
+                if name.lower() in STOPWORDS:
+                    continue
+                entities.append({
+                    "id": str(uuid.uuid4())[:8],
+                    "name": name,
+                    "entity_type": "person",
+                    "start": match.start(),
+                    "end": match.end(),
+                    "sentence": self._get_sentence(text, match.start())
+                })
+        
+        single_name_pattern = r"(?<!\.\s)\b([A-Z][a-z]+)\b(?!\s+[A-Z])"
+        words_seen = set()
+        
+        for match in re.finditer(single_name_pattern, text):
+            name = match.group(1)
+            name_lower = name.lower()
+            
+            if name_lower in STOPWORDS:
+                continue
+            if name_lower in KNOWN_LOCATIONS:
+                entity_type = "location"
+            elif name_lower in words_seen:
+                entity_type = "person"
+            else:
+                context_start = max(0, match.start() - 50)
+                context = text[context_start:match.start()].lower()
+                if any(word in context for word in ['said', 'replied', 'asked', 'told', 'whispered', 'shouted', 'called']):
+                    entity_type = "person"
+                else:
+                    words_seen.add(name_lower)
+                    continue
+            
+            words_seen.add(name_lower)
+            entities.append({
+                "id": str(uuid.uuid4())[:8],
+                "name": name,
+                "entity_type": entity_type,
+                "start": match.start(),
+                "end": match.end(),
+                "sentence": self._get_sentence(text, match.start())
+            })
+        
+        location_patterns = [
+            r'\b([A-Z][a-z]+(?:\s+(?:City|Town|Village|Mountain|River|Lake|Sea|Ocean|Forest|Valley|Kingdom|Castle|Palace|Temple|Tower)))\b',
+            r'\b(City|Town|Village|Mountain|River|Lake|Sea|Ocean|Forest|Valley|Kingdom|Castle|Palace|Temple|Tower)\s+of\s+([A-Z][a-z]+)\b',
+        ]
+        
+        for pattern in location_patterns:
+            for match in re.finditer(pattern, text):
+                name = match.group(0)
+                if name.lower() in STOPWORDS:
+                    continue
+                entities.append({
+                    "id": str(uuid.uuid4())[:8],
+                    "name": name,
+                    "entity_type": "location",
+                    "start": match.start(),
+                    "end": match.end(),
+                    "sentence": self._get_sentence(text, match.start())
+                })
+        
+        date_patterns = [
+            r'\b(\d{1,2}(?:st|nd|rd|th)?\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)(?:\s+\d{4})?)\b',
+            r'\b((?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}(?:st|nd|rd|th)?(?:,?\s+\d{4})?)\b',
+        ]
+        
+        for pattern in date_patterns:
+            for match in re.finditer(pattern, text, re.IGNORECASE):
+                entities.append({
+                    "id": str(uuid.uuid4())[:8],
+                    "name": match.group(1),
+                    "entity_type": "date",
+                    "start": match.start(),
+                    "end": match.end(),
+                    "sentence": self._get_sentence(text, match.start())
+                })
         
         return self._merge_duplicate_entities(entities)
     
@@ -103,6 +195,8 @@ class EntityTracker:
                     "end": entity["end"],
                     "sentence": entity["sentence"]
                 })
+                if merged[name_lower]["entity_type"] == "misc" and entity["entity_type"] != "misc":
+                    merged[name_lower]["entity_type"] = entity["entity_type"]
             else:
                 merged[name_lower] = {
                     **entity,
@@ -189,8 +283,8 @@ class EntityTracker:
             "family": r'\b(father|mother|brother|sister|son|daughter|uncle|aunt|cousin|husband|wife)\b',
             "friendship": r'\b(friend|companion|ally|partner)\b',
             "conflict": r'\b(enemy|rival|opponent|adversary)\b',
-            "location": r'\b(in|at|near|from|to|towards)\b',
-            "action": r'\b(met|saw|visited|called|helped|fought|loved|hated)\b',
+            "location": r'\b(in|at|near|from|to|towards|village of|city of)\b',
+            "action": r'\b(met|saw|visited|called|helped|fought|loved|hated|waited for)\b',
         }
         
         for rel_type, pattern in patterns.items():
