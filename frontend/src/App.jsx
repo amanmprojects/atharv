@@ -8,14 +8,18 @@ export default function App() {
     <Routes>
       <Route path="/" element={<ScriptIQLanding />} />
       <Route path="/editor" element={<AIWriterWorkbench initialView="editor" />} />
+      <Route path="/setup" element={<AIWriterWorkbench initialView="form" />} />
       <Route path="/dashboard" element={<AIWriterWorkbench initialView="issues" />} />
       <Route path="/character-universe" element={<AIWriterWorkbench initialView="universe" />} />
+      <Route path="/timeline" element={<AIWriterWorkbench initialView="timeline" />} />
       <Route path="/consistency" element={<AIWriterWorkbench initialView="consistency" />} />
       <Route path="/pacing" element={<AIWriterWorkbench initialView="pacing" />} />
       <Route path="/vibe-graph" element={<AIWriterWorkbench initialView="vibe" />} />
       <Route path="/plot-arc" element={<AIWriterWorkbench initialView="arc" />} />
       <Route path="/genre-profile" element={<AIWriterWorkbench initialView="genre" />} />
       <Route path="/dialogue-voice" element={<AIWriterWorkbench initialView="dialogue" />} />
+      <Route path="/trends" element={<AIWriterWorkbench initialView="trends" />} />
+      <Route path="/illustrations" element={<AIWriterWorkbench initialView="illustrations" />} />
       <Route path="/explainability" element={<AIWriterWorkbench initialView="explain" />} />
       <Route path="/issues" element={<AIWriterWorkbench initialView="issues" />} />
       <Route path="/settings" element={<AIWriterWorkbench initialView="editor" />} />

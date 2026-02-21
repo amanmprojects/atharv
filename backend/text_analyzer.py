@@ -5,6 +5,19 @@ File: text_analyzer.py - Structure, pacing, and writing quality analysis
  
 import re
 from collections import Counter
+
+try:
+    import spacy
+except ImportError:
+    spacy = None
+
+if spacy is not None:
+    try:
+        _nlp = spacy.load("en_core_web_sm")
+    except OSError:
+        _nlp = None
+else:
+    _nlp = None
  
  
 # ─────────────────────────────────────────────────────────────────────────────
@@ -200,49 +213,77 @@ class PacingAnalyzer:
     emotional intensity per paragraph.
     
     Returns a pacing curve that shows where story is fast/slow.
+    
+    Uses spaCy for lemmatization when available, enabling detection
+    of conjugated forms (running, runs -> run).
     """
- 
-    ACTION_VERBS = {
-        'ran', 'jumped', 'grabbed', 'fought', 'screamed', 'rushed', 'sprinted',
-        'attacked', 'escaped', 'chased', 'fired', 'struck', 'crashed', 'exploded',
-        'fell', 'dodged', 'threw', 'hit', 'pushed', 'pulled', 'slammed', 'burst'
+
+    ACTION_LEMMAS = {
+        'run', 'jump', 'grab', 'fight', 'scream', 'rush', 'sprint',
+        'attack', 'escape', 'chase', 'fire', 'strike', 'crash', 'explode',
+        'fall', 'dodge', 'throw', 'hit', 'push', 'pull', 'slam', 'burst',
+        'kick', 'punch', 'leap', 'dive', 'charge', 'flee', 'hunt',
+        'climb', 'swing', 'slash', 'shoot', 'punch', 'bite', 'tear',
+        'smash', 'break', 'shatter', 'rip', 'tear', 'spin', 'twist',
+        'dash', 'bolt', 'race', 'hurry', 'scramble', 'struggle',
+        'battle', 'wrestle', 'grapple', 'seize', 'snatch', 'catch'
     }
- 
-    EMOTION_WORDS = {
-        'high' : ['terrified', 'ecstatic', 'furious', 'desperate', 'anguished',
-                  'thrilled', 'horrified', 'elated', 'devastated', 'enraged'],
-        'medium': ['worried', 'excited', 'nervous', 'pleased', 'annoyed',
-                   'surprised', 'concerned', 'hopeful', 'uneasy', 'proud'],
-        'low'  : ['calm', 'peaceful', 'quiet', 'still', 'relaxed', 'content',
-                  'bored', 'neutral', 'steady', 'gentle']
+
+    EMOTION_LEMMAS = {
+        'high' : ['terrify', 'ecstatic', 'furious', 'desperate', 'anguish',
+                  'thrill', 'horrify', 'elate', 'devastate', 'enrage',
+                  'panic', 'terror', 'rage', 'fury', 'horror', 'ecstasy',
+                  'frenzy', 'hysteria', 'shock', 'trauma'],
+        'medium': ['worry', 'excite', 'nervous', 'please', 'annoy',
+                   'surprise', 'concern', 'hope', 'uneasy', 'proud',
+                   'anxious', 'tense', 'suspense', 'dread', 'eager',
+                   'restless', 'alert', 'anticipate', 'curious'],
+        'low'  : ['calm', 'peaceful', 'quiet', 'still', 'relax', 'content',
+                   'bore', 'neutral', 'steady', 'gentle', 'serene',
+                   'tranquil', 'soothe', 'mellow', 'lazy', 'drowsy']
     }
- 
+
+    IRREGULAR_VERBS = {
+        'ran': 'run', 'runs': 'run', 'running': 'run',
+        'fought': 'fight', 'fighting': 'fight',
+        'fell': 'fall', 'falls': 'fall', 'falling': 'fall',
+        'threw': 'throw', 'throws': 'throw', 'throwing': 'throw',
+        'struck': 'strike', 'strikes': 'strike', 'striking': 'strike',
+        'caught': 'catch', 'catches': 'catch', 'catching': 'catch',
+        'fled': 'flee', 'flees': 'flee', 'fleeing': 'flee',
+        'shot': 'shoot', 'shoots': 'shoot', 'shooting': 'shoot',
+        'bit': 'bite', 'bites': 'bite', 'biting': 'bite',
+        'tore': 'tear', 'tears': 'tear', 'tearing': 'tear',
+        'broke': 'break', 'breaks': 'break', 'breaking': 'break',
+        'leapt': 'leap', 'leaped': 'leap', 'leaps': 'leap', 'leaping': 'leap',
+        'dove': 'dive', 'dived': 'dive', 'dives': 'dive', 'diving': 'dive',
+        'terrified': 'terrify', 'terrifies': 'terrify', 'terrifying': 'terrify',
+        'horrified': 'horrify', 'horrifies': 'horrify', 'horrifying': 'horrify',
+        'thrilled': 'thrill', 'thrills': 'thrill', 'thrilling': 'thrill',
+        'elated': 'elate', 'elates': 'elate', 'elating': 'elate',
+        'devastated': 'devastate', 'devastates': 'devastate', 'devastating': 'devastate',
+        'enraged': 'enrage', 'enrages': 'enrage', 'enraging': 'enrage',
+        'worried': 'worry', 'worries': 'worry', 'worrying': 'worry',
+        'excited': 'excite', 'excites': 'excite', 'exciting': 'excite',
+        'pleased': 'please', 'pleases': 'please', 'pleasing': 'please',
+        'annoyed': 'annoy', 'annoys': 'annoy', 'annoying': 'annoy',
+        'surprised': 'surprise', 'surprises': 'surprise', 'surprising': 'surprise',
+        'bored': 'bore', 'bores': 'bore', 'boring': 'bore',
+        'relaxed': 'relax', 'relaxes': 'relax', 'relaxing': 'relax',
+    }
+
     def analyze(self, text, target_band=None):
         paragraphs = [p.strip() for p in text.split('\n\n') if p.strip()]
         pacing_data = []
- 
+
         for i, para in enumerate(paragraphs):
-            words      = para.lower().split()
-            word_set   = set(words)
- 
-            # Action density score
-            action_count  = len(word_set.intersection(self.ACTION_VERBS))
-            action_score  = min(10, action_count * 2)
- 
-            # Emotion intensity score
-            emotion_score = 0
-            for word in words:
-                if word in self.EMOTION_WORDS['high']:
-                    emotion_score += 3
-                elif word in self.EMOTION_WORDS['medium']:
-                    emotion_score += 1.5
-                elif word in self.EMOTION_WORDS['low']:
-                    emotion_score += 0.5
-            emotion_score = min(10, emotion_score)
- 
-            # Combined pacing score
+            if _nlp is not None:
+                action_score, emotion_score = self._analyze_with_spacy(para)
+            else:
+                action_score, emotion_score = self._analyze_fallback(para)
+
             combined = (action_score * 0.6 + emotion_score * 0.4)
- 
+
             pacing_data.append({
                 'paragraph'    : i + 1,
                 'action_score' : round(action_score, 2),
@@ -250,11 +291,87 @@ class PacingAnalyzer:
                 'pacing_score' : round(combined, 2),
                 'label'        : self._pace_label(combined)
             })
- 
-        # Generate suggestions based on pacing curve
+
         suggestions = self._generate_pacing_suggestions(pacing_data, target_band=target_band)
- 
+
         return {'pacing': pacing_data, 'suggestions': suggestions}
+
+    def _analyze_with_spacy(self, paragraph):
+        doc = _nlp(paragraph)
+        
+        action_count = 0
+        emotion_score = 0
+
+        for token in doc:
+            lemma = token.lemma_.lower()
+            
+            if lemma in self.ACTION_LEMMAS:
+                action_count += 1
+            
+            if lemma in self.EMOTION_LEMMAS['high']:
+                emotion_score += 3
+            elif lemma in self.EMOTION_LEMMAS['medium']:
+                emotion_score += 1.5
+            elif lemma in self.EMOTION_LEMMAS['low']:
+                emotion_score += 0.5
+
+        action_score = min(10, action_count * 2)
+        emotion_score = min(10, emotion_score)
+
+        return action_score, emotion_score
+
+    def _analyze_fallback(self, paragraph):
+        words = paragraph.lower().split()
+        
+        action_count = 0
+        emotion_score = 0
+
+        for word in words:
+            clean_word = re.sub(r'[^\w]', '', word)
+            
+            lemma = self.IRREGULAR_VERBS.get(clean_word, clean_word)
+            
+            if lemma in self.ACTION_LEMMAS:
+                action_count += 1
+                continue
+            
+            if self._word_matches_lemma(lemma, self.ACTION_LEMMAS):
+                action_count += 1
+
+            for level, lemmas in self.EMOTION_LEMMAS.items():
+                if lemma in lemmas:
+                    if level == 'high':
+                        emotion_score += 3
+                    elif level == 'medium':
+                        emotion_score += 1.5
+                    else:
+                        emotion_score += 0.5
+                    break
+                elif self._word_matches_lemma(lemma, lemmas):
+                    if level == 'high':
+                        emotion_score += 3
+                    elif level == 'medium':
+                        emotion_score += 1.5
+                    else:
+                        emotion_score += 0.5
+                    break
+
+        action_score = min(10, action_count * 2)
+        emotion_score = min(10, emotion_score)
+
+        return action_score, emotion_score
+
+    def _word_matches_lemma(self, word, lemma_set):
+        if isinstance(lemma_set, set):
+            for lemma in lemma_set:
+                if word == lemma:
+                    return True
+                if word.startswith(lemma) and len(word) - len(lemma) <= 3:
+                    suffix = word[len(lemma):]
+                    if suffix in ('', 's', 'ed', 'ing', 'er', 'est', 'ly', 'd'):
+                        return True
+            return False
+        return word == lemma_set
  
     def _pace_label(self, score):
         if score >= 7:   return '🔴 High Tension'

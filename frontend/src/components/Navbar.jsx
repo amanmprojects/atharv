@@ -2,6 +2,7 @@ export default function Navbar({
   activeView,
   setActiveView,
   hasResult,
+  formComplete,
   style,
   setStyle,
   onAnalyze,
@@ -9,14 +10,18 @@ export default function Navbar({
   backendOnline,
 }) {
   const tabs = [
+    { id: "form", label: "📋 Setup", always: true },
     { id: "editor", label: "Editor", always: true },
-    { id: "universe", label: "Character Universe" },
+    { id: "universe", label: "🌐 Universe" },
+    { id: "timeline", label: "📅 Timeline" },
     { id: "consistency", label: "Consistency" },
     { id: "pacing", label: "Pacing" },
     { id: "vibe", label: "Vibe Graph" },
     { id: "arc", label: "Plot Arc" },
     { id: "genre", label: "Genre Profile" },
     { id: "dialogue", label: "Dialogue Voice" },
+    { id: "trends", label: "📈 Trends" },
+    { id: "illustrations", label: "🎨 Illustrations" },
     { id: "explain", label: "Explainability" },
     { id: "issues", label: "Issues" },
   ];
@@ -27,7 +32,8 @@ export default function Navbar({
 
       <div className="nav-tabs">
         {tabs.map((tab) => {
-          const disabled = !tab.always && !hasResult;
+          const needsResult = !tab.always && !hasResult;
+          const disabled = needsResult;
           return (
             <button
               key={tab.id}
