@@ -1,23 +1,18 @@
 import { useState, useEffect } from 'react'
 import { ShieldCheck, Activity, BarChart3, TrendingUp, Zap, Clock, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 import { Progress } from '@/components/ui/progress'
-import { getAdminStats, getAdminHistory } from '@/lib/api'
+import { getAdminStats } from '@/lib/api'
 import type { AdminStats } from '@/types'
 
 export default function AdminDashboard() {
     const [stats, setStats] = useState<AdminStats | null>(null)
-    const [history, setHistory] = useState<Array<Record<string, unknown>>>([])
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [statsData, historyData] = await Promise.all([
-                    getAdminStats(),
-                    getAdminHistory(),
-                ])
+                const statsData = await getAdminStats()
                 setStats(statsData)
-                setHistory(historyData.history)
             } catch {
                 // Fallback with demo data
                 setStats({

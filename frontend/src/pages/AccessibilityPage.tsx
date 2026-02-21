@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Accessibility as AccessibilityIcon, Loader2, Brain, BookOpen, Languages, Eye, Lightbulb } from 'lucide-react'
+import { Accessibility as AccessibilityIcon, Loader2, Brain, BookOpen, Languages, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Progress } from '@/components/ui/progress'

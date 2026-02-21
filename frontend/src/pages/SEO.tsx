@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search, Loader2, TrendingUp, AlertTriangle, CheckCircle2, Target, FileText, Hash } from 'lucide-react'
+import { Search, Loader2, AlertTriangle, CheckCircle2, Target, FileText, Hash } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'

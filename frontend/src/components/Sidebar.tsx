@@ -11,8 +11,7 @@ import {
   Search,
   Accessibility,
   Fingerprint,
-  ShieldCheck,
-  Network
+  ShieldCheck
 } from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
 import { Button } from '@/components/ui/button'

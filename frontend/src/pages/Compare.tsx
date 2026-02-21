@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { GitCompare, Loader2, ArrowRight, TrendingUp, TrendingDown, Minus, BarChart3 } from 'lucide-react'
+import { GitCompare, Loader2, TrendingUp, TrendingDown, Minus, BarChart3 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Progress } from '@/components/ui/progress'

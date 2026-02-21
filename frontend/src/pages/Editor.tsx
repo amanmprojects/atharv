@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useParams } from 'react-router-dom'
 import {
   ArrowLeft,
   Play,
@@ -10,11 +11,11 @@ import {
   Network,
   Search,
   Accessibility,
-  Wand2
+  Wand2,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import Tiptap from '@/components/Tiptap'
+import EnhancedTiptap from '@/components/EnhancedTiptap'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
@@ -22,9 +23,19 @@ import { Slider } from '@/components/ui/slider'
 import { useToast } from '@/hooks/use-toast'
 import { analyzeText, transformStyle, trackSuggestionAction } from '@/lib/api'
 import type { AnalysisResponse } from '@/types'
+import type { DocumentContent } from '@/types/firebase'
 import SuggestionCard from '@/components/SuggestionCard'
 import EmotionalArcChart from '@/components/EmotionalArcChart'
 import StyleFingerprintRadar from '@/components/StyleFingerprintRadar'
+import { useDocumentStore } from '@/store/documents'
+import {
+  EMPTY_TIPTAP_DOCUMENT,
+  ensureDocumentContent,
+  extractPlainTextFromDocument,
+  isDocumentContent,
+  plainTextToDocument,
+  replaceFirstTextOccurrence,
+} from '@/lib/tiptap-content'
 
 const genres = [
   { id: 'fiction', label: 'Fiction' },
@@ -44,9 +55,24 @@ const styleModes = [
   { id: 'journalistic', label: 'Journalistic' },
 ]
 
+type SyncStatus = 'idle' | 'syncing' | 'synced' | 'offline'
+
 export default function Editor() {
+  const { docId } = useParams<{ docId: string }>()
+  const {
+    loading: docLoading,
+    saving: docSaving,
+    fetchDocument,
+    loadContent,
+    saveContent,
+    getCachedDocument,
+    getCachedContent,
+    cacheContent,
+    setCurrentDocument,
+  } = useDocumentStore()
+  
   const [title, setTitle] = useState('Untitled Document')
-  const [text, setText] = useState('')
+  const [editorContent, setEditorContent] = useState<DocumentContent>(EMPTY_TIPTAP_DOCUMENT)
   const [selectedGenre, setSelectedGenre] = useState('fiction')
   const [analysisResult, setAnalysisResult] = useState<AnalysisResponse | null>(null)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
@@ -54,6 +80,8 @@ export default function Editor() {
   const [activeTab, setActiveTab] = useState('suggestions')
   const [styleMode, setStyleMode] = useState('formal')
   const [intensity, setIntensity] = useState([0.5])
+  const [isDocumentInitializing, setIsDocumentInitializing] = useState(Boolean(docId))
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle')
 
   // Analysis toggles
   const [enableSEO, setEnableSEO] = useState(false)
@@ -61,9 +89,99 @@ export default function Editor() {
   const [enableKnowledgeGraph, setEnableKnowledgeGraph] = useState(false)
 
   const { toast } = useToast()
+  const isEditorLoading = Boolean(docId) && (isDocumentInitializing || docLoading)
+  const plainText = useMemo(
+    () => extractPlainTextFromDocument(editorContent),
+    [editorContent]
+  )
+
+  // Load document if docId is present
+  useEffect(() => {
+    if (!docId) {
+      setCurrentDocument(null)
+      setEditorContent(EMPTY_TIPTAP_DOCUMENT)
+      setIsDocumentInitializing(false)
+      setSyncStatus('idle')
+      return
+    }
+
+    let isCancelled = false
+    const cachedDoc = getCachedDocument(docId)
+    if (cachedDoc?.title) {
+      setTitle(cachedDoc.title)
+    }
+    const cached = getCachedContent(docId)
+    if (cached) {
+      setEditorContent(cached)
+      setIsDocumentInitializing(false)
+    } else {
+      setIsDocumentInitializing(true)
+    }
+    setSyncStatus('syncing')
+
+    const loadDocument = async () => {
+      try {
+        const [doc, content] = await Promise.all([
+          fetchDocument(docId),
+          loadContent(docId),
+        ])
+
+        if (isCancelled) {
+          return
+        }
+
+        if (doc) {
+          setTitle(doc.title)
+        }
+
+        if (content) {
+          const normalizedContent = ensureDocumentContent(content)
+          if (!cached || JSON.stringify(cached) !== JSON.stringify(normalizedContent)) {
+            setEditorContent(normalizedContent)
+          }
+        }
+        setSyncStatus('synced')
+        window.setTimeout(() => {
+          if (!isCancelled) setSyncStatus('idle')
+        }, 1500)
+      } catch {
+        setSyncStatus('offline')
+      } finally {
+        if (!isCancelled) {
+          setIsDocumentInitializing(false)
+        }
+      }
+    }
+
+    void loadDocument()
+    return () => {
+      isCancelled = true
+    }
+  }, [
+    docId,
+    fetchDocument,
+    getCachedContent,
+    getCachedDocument,
+    loadContent,
+    setCurrentDocument,
+  ])
+
+  // Save document handler
+  const handleSaveContent = useCallback(async (content: unknown) => {
+    if (docId && isDocumentContent(content)) {
+      try {
+        setSyncStatus('syncing')
+        await saveContent(docId, content)
+        setSyncStatus('synced')
+        window.setTimeout(() => setSyncStatus('idle'), 1200)
+      } catch {
+        setSyncStatus('offline')
+      }
+    }
+  }, [docId, saveContent])
 
   const handleAnalyze = useCallback(async () => {
-    if (!text.trim()) {
+    if (!plainText.trim()) {
       toast({ title: 'No text to analyze', description: 'Please enter some text first.', variant: 'destructive' })
       return
     }
@@ -71,7 +189,7 @@ export default function Editor() {
     setIsAnalyzing(true)
     try {
       const result = await analyzeText({
-        text,
+        text: plainText,
         genre: selectedGenre,
         mode: 'full',
         enable_narrative: true,
@@ -92,19 +210,19 @@ export default function Editor() {
     } finally {
       setIsAnalyzing(false)
     }
-  }, [text, selectedGenre, enableSEO, enableAccessibility, enableKnowledgeGraph, toast])
+  }, [plainText, selectedGenre, enableSEO, enableAccessibility, enableKnowledgeGraph, toast])
 
   const handleTransformStyle = async () => {
-    if (!text.trim()) return
+    if (!plainText.trim()) return
     setIsTransforming(true)
     try {
       const result = await transformStyle({
-        text,
+        text: plainText,
         style_mode: styleMode,
         intensity: intensity[0],
         preserve_entities: true,
       })
-      setText(result.transformed_text)
+      setEditorContent(plainTextToDocument(result.transformed_text))
       toast({
         title: 'Style Transformed',
         description: `Meaning preservation: ${(result.meaning_preservation_score * 100).toFixed(0)}%`,
@@ -120,11 +238,18 @@ export default function Editor() {
     if (analysisResult) {
       const suggestion = analysisResult.suggestions.find(s => s.suggestion_id === suggestionId)
 
-      // Apply the suggestion to the text if it has both original and modified
+      // Apply the suggestion to the first matching text node in the TipTap JSON.
       if (suggestion && suggestion.original_text && suggestion.modified_text) {
-        const newText = text.replace(suggestion.original_text, suggestion.modified_text)
-        if (newText !== text) {
-          setText(newText)
+        const replaceResult = replaceFirstTextOccurrence(
+          editorContent,
+          suggestion.original_text,
+          suggestion.modified_text
+        )
+        if (replaceResult.replaced) {
+          setEditorContent(replaceResult.content)
+          if (docId) {
+            cacheContent(docId, replaceResult.content)
+          }
           toast({
             title: 'Suggestion Applied',
             description: `"${suggestion.rule_triggered.split('.').pop()?.replace(/_/g, ' ')}" fix applied to text.`,
@@ -154,9 +279,9 @@ export default function Editor() {
     }
   }
 
-  const wordCount = text.trim().split(/\s+/).filter(Boolean).length
-  const sentenceCount = text.split(/[.!?]+/).filter(Boolean).length
-  const paragraphCount = text.split(/\n\s*\n/).filter(Boolean).length
+  const wordCount = plainText.trim().split(/\s+/).filter(Boolean).length
+  const sentenceCount = plainText.split(/[.!?]+/).filter(Boolean).length
+  const paragraphCount = plainText.split(/\n\s*\n/).filter(Boolean).length
 
   return (
     <div className="h-screen flex flex-col">
@@ -229,12 +354,44 @@ export default function Editor() {
       </header>
 
       <div className="flex-1 flex overflow-hidden">
-        <div className="flex-1 p-4">
-          <Tiptap
-            content={text}
-            onChange={setText}
-            className="h-full overflow-auto font-body text-base leading-relaxed border-2 border-foreground shadow-[4px_4px_0_0_hsl(var(--foreground))]"
-          />
+        <div className="flex-1 p-4 relative">
+          {docId && syncStatus !== 'idle' && (
+            <div className="absolute top-6 right-6 z-30 pointer-events-none">
+              <div className="px-3 py-1.5 bg-card border-2 border-foreground shadow-[2px_2px_0_0_hsl(var(--foreground))] text-xs font-mono uppercase tracking-wider flex items-center gap-1.5">
+                {syncStatus === 'syncing' && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                {syncStatus === 'synced' && <CheckCircle2 className="h-3.5 w-3.5" />}
+                {syncStatus === 'offline' && <AlertCircle className="h-3.5 w-3.5" />}
+                {syncStatus === 'syncing' && 'Syncing...'}
+                {syncStatus === 'synced' && 'Synced'}
+                {syncStatus === 'offline' && 'Offline cache'}
+              </div>
+            </div>
+          )}
+          {isEditorLoading ? (
+            <div className="h-full border-2 border-foreground bg-card shadow-[4px_4px_0_0_hsl(var(--foreground))] flex items-center justify-center">
+              <div className="text-center">
+                <Loader2 className="h-10 w-10 animate-spin text-muted-foreground mx-auto mb-3" />
+                <p className="font-mono text-sm text-muted-foreground uppercase tracking-wider">
+                  Loading document...
+                </p>
+              </div>
+            </div>
+          ) : (
+            <EnhancedTiptap
+              content={editorContent}
+              onChange={(json) => {
+                if (isDocumentContent(json)) {
+                  setEditorContent(json)
+                  if (docId) {
+                    cacheContent(docId, json)
+                  }
+                }
+              }}
+              onSave={docId ? handleSaveContent : undefined}
+              isSaving={docSaving}
+              className="h-full overflow-auto font-body text-base leading-relaxed border-2 border-foreground shadow-[4px_4px_0_0_hsl(var(--foreground))]"
+            />
+          )}
         </div>
 
         <div className="w-[420px] border-l-4 border-foreground bg-card flex flex-col">

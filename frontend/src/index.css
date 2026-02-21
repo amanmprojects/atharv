@@ -140,8 +140,14 @@
   margin: 0;
 }
 
-.tiptap h1,
-.tiptap h2,
+.tiptap h1 {
+  @apply font-heading font-black text-4xl leading-tight mt-6 mb-3;
+}
+
+.tiptap h2 {
+  @apply font-heading font-extrabold text-3xl leading-tight mt-5 mb-3;
+}
+
 .tiptap h3 {
-  @apply font-heading font-bold;
+  @apply font-heading font-bold text-2xl leading-snug mt-4 mb-2;
 }

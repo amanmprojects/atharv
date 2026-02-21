@@ -5,13 +5,29 @@ import type {
   KnowledgeGraphResponse, WatermarkEmbedResponse, WatermarkDetectResponse,
   StylometricSignature, AdminStats,
 } from '@/types'
+import type { Document as FirebaseDocument, AIRequest, AIFeature } from '@/types/firebase'
+
+const rawApiBaseUrl = import.meta.env.VITE_API_URL?.trim()
+const normalizedApiBaseUrl = (() => {
+  if (!rawApiBaseUrl) return '/api'
+  const trimmed = rawApiBaseUrl.replace(/\/+$/, '')
+  return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`
+})()
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: normalizedApiBaseUrl,
   headers: {
     'Content-Type': 'application/json',
   },
 })
+
+export const setAuthToken = (token: string) => {
+  api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+}
+
+export const clearAuthToken = () => {
+  delete api.defaults.headers.common['Authorization']
+}
 
 // Core Analysis
 export const analyzeText = async (request: AnalysisRequest): Promise<AnalysisResponse> => {
@@ -109,6 +125,71 @@ export const getAdminHistory = async (): Promise<{ history: Array<Record<string,
 
 export const trackSuggestionAction = async (suggestionId: string, status: 'accepted' | 'rejected'): Promise<void> => {
   await api.post('/analysis/admin/track-suggestion', { suggestion_id: suggestionId, status })
+}
+
+// Firebase Documents
+export const getFirebaseDocuments = async (userId: string): Promise<FirebaseDocument[]> => {
+  const response = await api.get<FirebaseDocument[]>('/firebase/documents/', {
+    headers: { Authorization: `Bearer ${userId}` }
+  })
+  return response.data
+}
+
+export const createFirebaseDocument = async (userId: string, title: string): Promise<FirebaseDocument> => {
+  const response = await api.post<FirebaseDocument>('/firebase/documents/', 
+    { title, owner_id: userId },
+    { headers: { Authorization: `Bearer ${userId}` } }
+  )
+  return response.data
+}
+
+export const getFirebaseDocument = async (userId: string, docId: string): Promise<FirebaseDocument> => {
+  const response = await api.get<FirebaseDocument>(`/firebase/documents/${docId}`, {
+    headers: { Authorization: `Bearer ${userId}` }
+  })
+  return response.data
+}
+
+export const getFirebaseDocumentContent = async (userId: string, docId: string): Promise<Record<string, unknown>> => {
+  const response = await api.get<Record<string, unknown>>(`/firebase/documents/${docId}/content`, {
+    headers: { Authorization: `Bearer ${userId}` }
+  })
+  return response.data
+}
+
+export const saveFirebaseDocumentContent = async (userId: string, docId: string, content: Record<string, unknown>): Promise<void> => {
+  await api.put(`/firebase/documents/${docId}/content`, 
+    { content },
+    { headers: { Authorization: `Bearer ${userId}` } }
+  )
+}
+
+export const deleteFirebaseDocument = async (userId: string, docId: string): Promise<void> => {
+  await api.delete(`/firebase/documents/${docId}`, {
+    headers: { Authorization: `Bearer ${userId}` }
+  })
+}
+
+// AI Features
+export const createAIRequest = async (
+  userId: string,
+  documentId: string,
+  feature: AIFeature,
+  input: Record<string, unknown>,
+  aiConsent: boolean
+): Promise<AIRequest> => {
+  const response = await api.post<AIRequest>(`/ai/${feature}`, 
+    { user_id: userId, document_id: documentId, feature, input, ai_consent: aiConsent },
+    { headers: { Authorization: `Bearer ${userId}` } }
+  )
+  return response.data
+}
+
+export const getAIRequest = async (userId: string, feature: AIFeature, requestId: string): Promise<AIRequest> => {
+  const response = await api.get<AIRequest>(`/ai/${feature}/${requestId}`, {
+    headers: { Authorization: `Bearer ${userId}` }
+  })
+  return response.data
 }
 
 export default api
