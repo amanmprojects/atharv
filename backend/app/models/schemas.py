@@ -81,5 +81,5 @@ class AnalyzeResponse(BaseModel):
     entity_graph: Optional[EntityGraph] = None
     consistency_warnings: List[ConsistencyWarning] = []
     enhancement_suggestions: List[EnhancementSuggestion] = []
-    readability_scores: Dict[str, float] = {}
+    readability_scores: Dict[str, Any] = {}
     statistics: Dict[str, Any] = {}
