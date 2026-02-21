@@ -50,3 +50,9 @@ Thumbs.db
 .ruff_cache/
 
 *.local
+
+# Local/reference-only repositories and agent instructions
+docsclone/
+tiptap-docs/
+tiptap_v3_doc.md
+AGENTS.md
