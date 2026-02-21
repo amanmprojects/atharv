@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScriptIQ</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 380px;
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      background: #0a0a0a;
+      color: #fafaf5;
+    }
+    .header {
+      background: #a3e635;
+      color: #0a0a0a;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 3px solid #0a0a0a;
+    }
+    .header h1 {
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      text-transform: uppercase;
+    }
+    .header .badge {
+      background: #0a0a0a;
+      color: #a3e635;
+      font-size: 9px;
+      padding: 2px 6px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .content { padding: 16px 20px; }
+    textarea {
+      width: 100%;
+      height: 120px;
+      background: #1a1a1a;
+      color: #fafaf5;
+      border: 2px solid #333;
+      padding: 12px;
+      font-size: 13px;
+      font-family: 'JetBrains Mono', monospace;
+      resize: none;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    textarea:focus { border-color: #a3e635; }
+    textarea::placeholder { color: #555; }
+    .btn {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      background: #a3e635;
+      color: #0a0a0a;
+      border: 2px solid #0a0a0a;
+      font-weight: 900;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      box-shadow: 3px 3px 0 0 #333;
+      transition: all 0.15s;
+    }
+    .btn:hover {
+      transform: translateY(1px);
+      box-shadow: 1px 1px 0 0 #333;
+    }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-outline {
+      background: transparent;
+      color: #a3e635;
+      border-color: #a3e635;
+    }
+    .results { margin-top: 16px; }
+    .result-card {
+      background: #1a1a1a;
+      border: 2px solid #333;
+      padding: 12px;
+      margin-bottom: 8px;
+    }
+    .result-card .label {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #888;
+      margin-bottom: 4px;
+    }
+    .result-card .value {
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+    }
+    .score-good { color: #a3e635; }
+    .score-ok { color: #facc15; }
+    .score-bad { color: #ef4444; }
+    .suggestion-item {
+      background: #1a1a1a;
+      border-left: 3px solid #a3e635;
+      padding: 10px 12px;
+      margin-bottom: 6px;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .suggestion-item .rule {
+      font-size: 10px;
+      color: #a3e635;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .suggestion-item .reason { color: #ccc; }
+    .stats-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .stat {
+      flex: 1;
+      text-align: center;
+      padding: 8px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+    }
+    .stat .num { font-size: 18px; font-weight: 900; }
+    .stat .lbl { font-size: 9px; color: #888; text-transform: uppercase; font-weight: 700; }
+    .footer {
+      padding: 12px 20px;
+      border-top: 2px solid #333;
+      text-align: center;
+      font-size: 10px;
+      color: #555;
+    }
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #a3e635;
+      font-weight: 700;
+    }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>ScriptIQ</h1>
+    <span class="badge">v1.0</span>
+  </div>
+
+  <div class="content">
+    <textarea id="textInput" placeholder="Paste or type text to analyze..."></textarea>
+    
+    <button class="btn" id="analyzeBtn" onclick="analyzeText()">⚡ Analyze Text</button>
+    <button class="btn btn-outline" id="grabBtn" onclick="grabPageText()">📋 Grab Page Selection</button>
+
+    <div id="loading" class="loading hidden">Analyzing...</div>
+
+    <div id="results" class="results hidden">
+      <div class="stats-row">
+        <div class="stat">
+          <div class="num" id="wordCount">0</div>
+          <div class="lbl">Words</div>
+        </div>
+        <div class="stat">
+          <div class="num" id="sentenceCount">0</div>
+          <div class="lbl">Sentences</div>
+        </div>
+        <div class="stat">
+          <div class="num" id="suggestionCount">0</div>
+          <div class="lbl">Suggestions</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 12px;" id="suggestionsContainer"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    80% Custom NLP · 20% Controlled LLM
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
