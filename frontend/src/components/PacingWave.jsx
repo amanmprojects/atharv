@@ -10,8 +10,12 @@ const COLORS = {
   overall: "#f59e0b",
 };
  
-export default function PacingWave({ pacing, suggestions }) {
+export default function PacingWave({ pacing = [], suggestions = [] }) {
   const svgRef = useRef();
+  const avgPacing = pacing?.length
+    ? (pacing.reduce((sum, row) => sum + Number(row.pacing_score || 0), 0) / pacing.length).toFixed(1)
+    : "0.0";
+  const highTensionCount = pacing?.filter((row) => Number(row.pacing_score || 0) >= 7).length || 0;
  
   useEffect(() => {
     if (!pacing?.length || !svgRef.current) return;
@@ -22,64 +26,65 @@ export default function PacingWave({ pacing, suggestions }) {
     <div className="pacing-container">
       <div className="pacing-header">
         Narrative <span>Pacing</span> Curve
+        <p>Shows speed and intensity changes per paragraph so you can smooth peaks and avoid flat stretches.</p>
       </div>
       <div className="pacing-chart-wrap">
+        <div className="analysis-metrics-grid">
+          <MetricCard label="Avg Pacing" value={`${avgPacing}/10`} />
+          <MetricCard label="High Tension" value={highTensionCount} />
+          <MetricCard label="Paragraphs" value={pacing?.length || 0} />
+        </div>
+
         <svg
           ref={svgRef}
-          style={{ width: "100%", height: 320 }}
+          className="analysis-svg"
           viewBox="0 0 1000 320"
           preserveAspectRatio="none"
         />
  
-        {/* Legend */}
-        <div style={{ display: "flex", gap: 24, marginTop: 8 }}>
+        <div className="analysis-legend-row">
           {[
             { label: "Overall Pacing", color: COLORS.overall },
             { label: "Action Density", color: COLORS.action },
             { label: "Emotion Intensity", color: COLORS.emotion },
           ].map(({ label, color }) => (
-            <div key={label} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, color: "#64748b" }}>
-              <div style={{ width: 24, height: 2, background: color, borderRadius: 2 }} />
-              {label}
-            </div>
+            <Legend key={label} color={color} text={label} />
           ))}
         </div>
  
-        {/* Pacing table */}
-        <div style={{ overflowX: "auto", marginTop: 8 }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11, fontFamily: "var(--font-mono)" }}>
+        <div className="analysis-table-wrap">
+          <table className="analysis-table">
             <thead>
-              <tr style={{ borderBottom: "1px solid #1e2d3d" }}>
+              <tr>
                 {["Para", "Pacing", "Overall", "Action", "Emotion"].map(h => (
-                  <th key={h} style={{ padding: "6px 12px", textAlign: "left", color: "#64748b", fontWeight: 400, letterSpacing: "0.05em", textTransform: "uppercase", fontSize: 10 }}>{h}</th>
+                  <th key={h}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {pacing.map((row, i) => (
-                <tr key={i} style={{ borderBottom: "1px solid #131920" }}>
-                  <td style={{ padding: "6px 12px", color: "#64748b" }}>{row.paragraph}</td>
-                  <td style={{ padding: "6px 12px", color: row.pacing_score >= 7 ? "#ef4444" : row.pacing_score >= 4 ? "#f59e0b" : "#22d3ee" }}>{row.label}</td>
-                  <td style={{ padding: "6px 12px" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <div style={{ flex: 1, height: 4, background: "#1e2d3d", borderRadius: 2, overflow: "hidden" }}>
-                        <div style={{ width: `${row.pacing_score * 10}%`, height: "100%", background: "#f59e0b", borderRadius: 2 }} />
+                <tr key={i}>
+                  <td>P{row.paragraph}</td>
+                  <td className={`analysis-tone ${row.pacing_score >= 7 ? "danger" : row.pacing_score >= 4 ? "warning" : "healthy"}`}>{row.label}</td>
+                  <td>
+                    <div className="analysis-inline-meter">
+                      <div className="analysis-inline-track">
+                        <div style={{ width: `${row.pacing_score * 10}%` }} className="analysis-inline-fill" />
                       </div>
                       {row.pacing_score}
                     </div>
                   </td>
-                  <td style={{ padding: "6px 12px", color: "#ef4444" }}>{row.action_score}</td>
-                  <td style={{ padding: "6px 12px", color: "#22d3ee" }}>{row.emotion_score}</td>
+                  <td className="analysis-tone danger">{row.action_score}</td>
+                  <td className="analysis-tone healthy">{row.emotion_score}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
  
-        {/* Suggestions */}
         {suggestions?.length > 0 && (
           <div className="pacing-suggestions">
-            <div style={{ fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#64748b", marginBottom: 4 }}>
+            <div className="analysis-section-title">
               Pacing Suggestions
             </div>
             {suggestions.map((s, i) => (
@@ -88,6 +93,24 @@ export default function PacingWave({ pacing, suggestions }) {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function MetricCard({ label, value }) {
+  return (
+    <div className="analysis-metric-card">
+      <div className="analysis-metric-label">{label}</div>
+      <div className="analysis-metric-value">{value}</div>
+    </div>
+  );
+}
+
+function Legend({ color, text }) {
+  return (
+    <div className="analysis-legend-item">
+      <div style={{ background: color }} className="analysis-legend-line" />
+      {text}
     </div>
   );
 }

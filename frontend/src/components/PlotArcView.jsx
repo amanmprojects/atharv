@@ -4,8 +4,13 @@ import { useEffect, useRef } from "react";
 
 const PHASE_ORDER = ["Setup", "Rising Action", "Climax", "Falling Action", "Resolution"];
 
-export default function PlotArcView({ arcCurve, arcMap, phaseCounts, phaseColors, issues }) {
+export default function PlotArcView({ arcCurve = [], arcMap = [], phaseCounts = {}, phaseColors = {}, issues = [] }) {
   const svgRef = useRef();
+  const totalMapped = arcMap?.length || 0;
+  const dominantPhase = PHASE_ORDER.reduce((best, phase) => {
+    const count = phaseCounts?.[phase] || 0;
+    return count > best.count ? { phase, count } : best;
+  }, { phase: "-", count: 0 });
 
   useEffect(() => {
     if (!arcCurve?.length || !svgRef.current) return;
@@ -15,15 +20,20 @@ export default function PlotArcView({ arcCurve, arcMap, phaseCounts, phaseColors
   return (
     <div className="pacing-container">
       <div className="pacing-header">
-        Plot <span style={{ color: "#a78bfa" }}>Arc</span> Analysis
+        Plot <span>Arc</span> Analysis
+        <p>Visualizes where each paragraph sits in the narrative arc from setup to resolution.</p>
       </div>
-      <div className="pacing-chart-wrap" style={{ boxShadow: "0 0 40px rgba(139,92,246,0.12)" }}>
+      <div className="pacing-chart-wrap plot-arc-wrap">
+        <div className="analysis-metrics-grid">
+          <MetricCard label="Mapped Paragraphs" value={totalMapped} />
+          <MetricCard label="Dominant Phase" value={dominantPhase.phase} />
+          <MetricCard label="Arc Issues" value={issues?.length || 0} />
+        </div>
 
-        {/* Arc Legend */}
-        <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 8 }}>
+        <div className="analysis-legend-row">
           {PHASE_ORDER.map(phase => (
-            <div key={phase} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: "#94a3b8" }}>
-              <div style={{ width: 10, height: 10, borderRadius: "50%", background: phaseColors?.[phase] || "#64748b" }} />
+            <div key={phase} className="analysis-legend-item">
+              <div className="plot-arc-dot" style={{ background: phaseColors?.[phase] || "#64748b" }} />
               {phase}
               <span style={{ color: phaseColors?.[phase], fontWeight: 700 }}>
                 ({phaseCounts?.[phase] || 0})
@@ -32,35 +42,39 @@ export default function PlotArcView({ arcCurve, arcMap, phaseCounts, phaseColors
           ))}
         </div>
 
-        <svg ref={svgRef} style={{ width: "100%", height: 280 }} viewBox="0 0 1000 280" preserveAspectRatio="none" />
+        <svg ref={svgRef} className="analysis-svg" viewBox="0 0 1000 280" preserveAspectRatio="none" />
 
-        {/* Phase breakdown table */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 8, marginTop: 12 }}>
+        <div className="plot-arc-phase-grid">
           {PHASE_ORDER.map(phase => (
-            <div key={phase} style={{
-              background: "#0d1117", border: `1px solid ${phaseColors?.[phase] || "#1e2d3d"}`,
-              borderRadius: 8, padding: "10px 12px", textAlign: "center"
-            }}>
-              <div style={{ fontSize: 18, fontWeight: 800, color: phaseColors?.[phase], fontFamily: "var(--font-display)" }}>
+            <div key={phase} className="plot-arc-phase-card" style={{ borderColor: phaseColors?.[phase] || "var(--border)" }}>
+              <div className="plot-arc-phase-value" style={{ color: phaseColors?.[phase] }}>
                 {phaseCounts?.[phase] || 0}
               </div>
-              <div style={{ fontSize: 10, color: "#64748b", marginTop: 2 }}>{phase}</div>
+              <div className="plot-arc-phase-label">{phase}</div>
             </div>
           ))}
         </div>
 
-        {/* Arc issues */}
         {issues?.length > 0 && (
-          <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
-            <div style={{ fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#64748b" }}>Arc Issues</div>
+          <div className="pacing-suggestions">
+            <div className="analysis-section-title">Arc Issues</div>
             {issues.map((issue, i) => (
-              <div key={i} className="pacing-suggestion" style={{ borderColor: "rgba(139,92,246,0.3)", color: "#a78bfa" }}>
+              <div key={i} className="pacing-suggestion">
                 {issue.message}
               </div>
             ))}
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function MetricCard({ label, value }) {
+  return (
+    <div className="analysis-metric-card">
+      <div className="analysis-metric-label">{label}</div>
+      <div className="analysis-metric-value">{value}</div>
     </div>
   );
 }

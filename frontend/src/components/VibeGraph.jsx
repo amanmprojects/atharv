@@ -67,10 +67,11 @@ export default function VibeGraph({ pacing = [], genreRows = [], driftIssues = [
     <div className="pacing-container">
       <div className="pacing-header">
         Story <span>Vibe</span> Graph
+        <p>Maps emotional and tonal momentum so you can see where the story feels calm, steady, or electric.</p>
       </div>
 
       <div className="pacing-chart-wrap">
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10 }}>
+        <div className="analysis-metrics-grid">
           <MetricCard label="Average Vibe" value={`${averageVibe.toFixed(1)}/10`} />
           <MetricCard label="Peak Paragraph" value={peak ? `P${peak.paragraph}` : "-"} />
           <MetricCard label="Volatility" value={`${volatility.toFixed(2)} delta`} />
@@ -80,12 +81,12 @@ export default function VibeGraph({ pacing = [], genreRows = [], driftIssues = [
 
         <svg
           ref={svgRef}
-          style={{ width: "100%", height: 360, marginTop: 8 }}
+          className="analysis-svg analysis-svg-lg"
           viewBox="0 0 1000 360"
           preserveAspectRatio="none"
         />
 
-        <div style={{ display: "flex", gap: 18, marginTop: 4, flexWrap: "wrap" }}>
+        <div className="analysis-legend-row">
           <Legend color="#22d3ee" text="Emotion line" />
           <Legend color="#f59e0b" text="Vibe line" />
           <Legend color="#94a3b8" text="3-point trend line" />
@@ -93,25 +94,12 @@ export default function VibeGraph({ pacing = [], genreRows = [], driftIssues = [
           <Legend color="#10b981" text="Vibe zones (Calm to Electric)" />
         </div>
 
-        <div style={{ marginTop: 8, overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11, fontFamily: "var(--font-mono)" }}>
+        <div className="analysis-table-wrap">
+          <table className="analysis-table">
             <thead>
-              <tr style={{ borderBottom: "1px solid #1e2d3d" }}>
+              <tr>
                 {["Para", "Vibe", "Delta", "Label", "Genre", "Confidence", "Emotion", "Action", "Pacing", "Drift"].map((head) => (
-                  <th
-                    key={head}
-                    style={{
-                      textAlign: "left",
-                      padding: "6px 10px",
-                      color: "#64748b",
-                      letterSpacing: "0.05em",
-                      textTransform: "uppercase",
-                      fontSize: 10,
-                      fontWeight: 400,
-                    }}
-                  >
-                    {head}
-                  </th>
+                  <th key={head}>{head}</th>
                 ))}
               </tr>
             </thead>
@@ -120,19 +108,19 @@ export default function VibeGraph({ pacing = [], genreRows = [], driftIssues = [
                 const previous = points[index - 1]?.vibe_score ?? point.vibe_score;
                 const delta = point.vibe_score - previous;
                 return (
-                  <tr key={point.paragraph} style={{ borderBottom: "1px solid #131920" }}>
-                    <td style={{ padding: "6px 10px", color: "#94a3b8" }}>P{point.paragraph}</td>
-                    <td style={{ padding: "6px 10px", color: "#f59e0b", fontWeight: 700 }}>{point.vibe_score.toFixed(1)}</td>
-                    <td style={{ padding: "6px 10px", color: delta >= 0 ? "#10b981" : "#ef4444" }}>
+                  <tr key={point.paragraph}>
+                    <td>P{point.paragraph}</td>
+                    <td className="analysis-tone warning">{point.vibe_score.toFixed(1)}</td>
+                    <td className={`analysis-tone ${delta >= 0 ? "positive" : "danger"}`}>
                       {index === 0 ? "-" : `${delta >= 0 ? "+" : ""}${delta.toFixed(2)}`}
                     </td>
-                    <td style={{ padding: "6px 10px", color: vibeColor(point.vibe_score) }}>{point.vibe_label}</td>
-                    <td style={{ padding: "6px 10px", color: point.genre_color, textTransform: "capitalize" }}>{point.genre}</td>
-                    <td style={{ padding: "6px 10px", color: "#94a3b8" }}>{Math.round(point.genre_confidence * 100)}%</td>
-                    <td style={{ padding: "6px 10px", color: "#22d3ee" }}>{point.emotion_score}</td>
-                    <td style={{ padding: "6px 10px", color: "#ef4444" }}>{point.action_score}</td>
-                    <td style={{ padding: "6px 10px", color: "#94a3b8" }}>{point.pacing_score}</td>
-                    <td style={{ padding: "6px 10px", color: point.drift ? "#ef4444" : "#10b981" }}>{point.drift ? "Yes" : "No"}</td>
+                    <td style={{ color: vibeColor(point.vibe_score) }}>{point.vibe_label}</td>
+                    <td style={{ color: point.genre_color, textTransform: "capitalize" }}>{point.genre}</td>
+                    <td>{Math.round(point.genre_confidence * 100)}%</td>
+                    <td className="analysis-tone healthy">{point.emotion_score}</td>
+                    <td className="analysis-tone danger">{point.action_score}</td>
+                    <td>{point.pacing_score}</td>
+                    <td className={`analysis-tone ${point.drift ? "danger" : "positive"}`}>{point.drift ? "Yes" : "No"}</td>
                   </tr>
                 );
               })}
@@ -347,17 +335,17 @@ function vibeColor(score) {
 
 function MetricCard({ label, value }) {
   return (
-    <div style={{ border: "1px solid #1e2d3d", borderRadius: 10, padding: "10px 12px", background: "#0d1117" }}>
-      <div style={{ fontSize: 10, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}</div>
-      <div style={{ marginTop: 6, fontSize: 20, color: "#e2e8f0", fontFamily: "var(--font-display)", fontWeight: 800 }}>{value}</div>
+    <div className="analysis-metric-card">
+      <div className="analysis-metric-label">{label}</div>
+      <div className="analysis-metric-value">{value}</div>
     </div>
   );
 }
 
 function Legend({ color, text }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, color: "#64748b" }}>
-      <div style={{ width: 22, height: 2, background: color, borderRadius: 2 }} />
+    <div className="analysis-legend-item">
+      <div style={{ background: color }} className="analysis-legend-line" />
       {text}
     </div>
   );

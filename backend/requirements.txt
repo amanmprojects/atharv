@@ -14,8 +14,6 @@ transformers==4.37.0
 tokenizers==0.15.2
 huggingface_hub==0.36.2
 
-# Generative AI
-google-generativeai==0.3.2
 
 # Data & Analysis
 numpy==1.26.3

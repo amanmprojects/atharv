@@ -115,11 +115,40 @@ export default function ExplainabilityView({ result }) {
     <div className="pacing-container">
       <div className="pacing-header">
         Explainability <span>Center</span>
+        <p>Audit exactly what changed, which analyzers triggered, and why each issue matters.</p>
       </div>
 
       <div className="pacing-chart-wrap explain-wrap">
+        <div className="analysis-metrics-grid explain-metrics-grid">
+          <Card label="Style" value={styleResult.style || "n/a"} />
+          <Card label="Style Changes" value={styleResult.num_changes || 0} />
+          <Card label="Readability" value={`${Number(result?.readability_score || 0).toFixed(0)}/100`} />
+          <Card label="Total Issues" value={report.total_issues || 0} />
+          <Card label="High" value={severitySummary.high} tone="high" />
+          <Card label="Medium" value={severitySummary.medium} tone="medium" />
+          <Card label="Low" value={severitySummary.low} tone="low" />
+        </div>
+
+        <section className="explain-hero">
+          <div className="explain-hero-copy">
+            <div className="analysis-section-title">Report Summary</div>
+            <h3>Pipeline Transparency</h3>
+            <p>
+              This view links analyzer outputs to concrete edits and issue rationales, so you can decide which changes to keep.
+            </p>
+          </div>
+          <div className="explain-actions">
+            <button type="button" className="btn-ghost" onClick={handleCopySummary}>
+              {copied ? "Copied" : "Copy Summary"}
+            </button>
+            <button type="button" className="btn-primary" onClick={handleDownloadJson}>
+              Download JSON
+            </button>
+          </div>
+        </section>
+
         <section className="explain-panel">
-          <div className="pane-label">Analysis Logic Trace</div>
+          <div className="analysis-section-title">Analysis Logic Trace</div>
           <div className="logic-grid">
             {logicModules.map((module) => (
               <div key={module.name} className="logic-card">
@@ -131,30 +160,9 @@ export default function ExplainabilityView({ result }) {
           </div>
         </section>
 
-        <div className="explain-top">
-          <div className="explain-grid">
-            <Card label="Style" value={styleResult.style || "n/a"} />
-            <Card label="Style Changes" value={styleResult.num_changes || 0} />
-            <Card label="Readability" value={`${Number(result?.readability_score || 0).toFixed(0)}/100`} />
-            <Card label="Total Issues" value={report.total_issues || 0} />
-            <Card label="High" value={severitySummary.high} tone="high" />
-            <Card label="Medium" value={severitySummary.medium} tone="medium" />
-            <Card label="Low" value={severitySummary.low} tone="low" />
-          </div>
-
-          <div className="explain-actions">
-            <button type="button" className="btn-ghost" onClick={handleCopySummary}>
-              {copied ? "Copied" : "Copy Summary"}
-            </button>
-            <button type="button" className="btn-primary" onClick={handleDownloadJson}>
-              Download JSON
-            </button>
-          </div>
-        </div>
-
         <div className="explain-columns">
           <section className="explain-panel">
-            <div className="pane-label">What Changed (Style Rules)</div>
+            <div className="analysis-section-title">What Changed (Style Rules)</div>
             {changeLog.length === 0 && <div className="explain-empty">No style replacements were applied.</div>}
             {changeLog.length > 0 && (
               <div className="explain-list">
@@ -173,7 +181,7 @@ export default function ExplainabilityView({ result }) {
           </section>
 
           <section className="explain-panel">
-            <div className="pane-label">Text Diff Blocks</div>
+            <div className="analysis-section-title">Text Diff Blocks</div>
             {diff.length === 0 && <div className="explain-empty">No diff blocks to display.</div>}
             {diff.length > 0 && (
               <div className="explain-list">
@@ -190,10 +198,10 @@ export default function ExplainabilityView({ result }) {
         </div>
 
         <section className="explain-panel">
-          <div className="pane-label">Why It Matters (Issue Rationales)</div>
+          <div className="analysis-section-title">Why It Matters (Issue Rationales)</div>
           {issues.length === 0 && <div className="explain-empty">No issues detected.</div>}
           {issues.length > 0 && (
-            <div className="explain-list">
+            <div className="explain-list explain-list-tall">
               {issues.slice(0, 24).map((issue, idx) => (
                 <div key={`issue-${idx}`} className={`issue-row ${issue.severity || "low"}`}>
                   <div className="issue-row-head">
@@ -214,9 +222,9 @@ export default function ExplainabilityView({ result }) {
 
 function Card({ label, value, tone = "default" }) {
   return (
-    <div className={`explain-card ${tone}`}>
-      <div className="explain-card-label">{label}</div>
-      <div className="explain-card-value">{value}</div>
+    <div className={`analysis-metric-card ${tone}`}>
+      <div className="analysis-metric-label">{label}</div>
+      <div className="analysis-metric-value">{value}</div>
     </div>
   );
 }
