@@ -76,7 +76,7 @@ export default function AIWriterWorkbench({ initialView = "editor" }) {
     setError(null);
 
     try {
-      const data = await analyzeText(text, style);
+      const data = await analyzeText(text, style, 0.25, context);
       setResult(normalizeResult(data, text, style));
       setBackendOnline(true);
       setActiveView("universe");
@@ -86,7 +86,7 @@ export default function AIWriterWorkbench({ initialView = "editor" }) {
     } finally {
       setLoading(false);
     }
-  }, [text, style]);
+  }, [text, style, context]);
 
   return (
     <div className="app">

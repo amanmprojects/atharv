@@ -48,7 +48,7 @@ async function tryRequest(path, options = {}) {
   throw new Error("Backend is unreachable. Verify API base URL or proxy settings.");
 }
 
-export async function analyzeText(text, targetStyle = "formal", similarityThreshold = 0.25) {
+export async function analyzeText(text, targetStyle = "formal", similarityThreshold = 0.25, context = null) {
   return tryRequest("/analyze", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -56,6 +56,20 @@ export async function analyzeText(text, targetStyle = "formal", similarityThresh
       text,
       target_style: targetStyle,
       similarity_threshold: similarityThreshold,
+      context: context || {},
+    }),
+  });
+}
+
+export async function generateImages(text, artStyle = "illustrated", mode = "mock", analysisResult = null) {
+  return tryRequest("/generate-images", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      text,
+      art_style: artStyle,
+      mode,
+      analysis_result: analysisResult || {},
     }),
   });
 }
