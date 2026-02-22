@@ -3,7 +3,7 @@
 
 const ENV_BASE = (import.meta.env.VITE_API_BASE_URL || "").trim();
 const CANDIDATE_BASES = Array.from(
-  new Set([ENV_BASE, "/api", "http://127.0.0.1:8000", "http://localhost:8000"].filter(Boolean)),
+  new Set([ENV_BASE, "/api", "http://127.0.0.1:8010", "http://localhost:8010", "http://127.0.0.1:8000", "http://localhost:8000"].filter(Boolean)),
 );
 
 function buildUrl(base, path) {
@@ -62,7 +62,7 @@ export async function analyzeText(text, targetStyle = "formal", similarityThresh
 }
 
 export async function generateImages(text, artStyle = "illustrated", mode = "mock", analysisResult = null) {
-  return tryRequest("/generate-images", {
+  const payload = await tryRequest("/generate-images", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -72,8 +72,14 @@ export async function generateImages(text, artStyle = "illustrated", mode = "moc
       analysis_result: analysisResult || {},
     }),
   });
+  return payload?.images || [];
 }
 
 export async function healthCheck() {
   return tryRequest("/health");
+}
+
+export async function getImageStyles() {
+  const payload = await tryRequest("/image-styles");
+  return payload?.styles || [];
 }

@@ -7,22 +7,23 @@ export default function Navbar({
   onAnalyze,
   loading,
   backendOnline,
+  formComplete = false,
 }) {
   const tabs = [
-    { id: "editor", label: "📝 Editor", always: true },
-    { id: "form", label: "📋 Setup", always: true },
-    { id: "universe", label: "🌐 Universe" },
-    { id: "timeline", label: "📅 Timeline" },
-    { id: "consistency", label: "✓ Consistency" },
-    { id: "pacing", label: "📈 Pacing" },
-    { id: "vibe", label: "🎨 Vibe" },
-    { id: "arc", label: "📊 Arc" },
-    { id: "genre", label: "🎭 Genre" },
-    { id: "dialogue", label: "💬 Dialogue" },
-    { id: "trends", label: "📍 Trends" },
-    { id: "illustrations", label: "🎨 Illustrations" },
-    { id: "explain", label: "🔍 Explain" },
-    { id: "issues", label: "⚠️ Issues" },
+    { id: "form", label: "?? Setup", always: true },
+    { id: "editor", label: "Editor", always: true },
+    { id: "universe", label: "?? Universe" },
+    { id: "timeline", label: "?? Timeline" },
+    { id: "consistency", label: "Consistency" },
+    { id: "pacing", label: "Pacing" },
+    { id: "vibe", label: "Vibe Graph" },
+    { id: "arc", label: "Plot Arc" },
+    { id: "trends", label: "?? Trends" },
+    { id: "genre", label: "Genre Profile" },
+    { id: "dialogue", label: "Dialogue Voice" },
+    { id: "illustrations", label: "?? Illustrations" },
+    { id: "explain", label: "Explainability" },
+    { id: "issues", label: "Issues" },
   ];
 
   return (
@@ -31,7 +32,10 @@ export default function Navbar({
 
       <div className="nav-tabs">
         {tabs.map((tab) => {
-          const disabled = !tab.always && !hasResult;
+          const blockedBySetup = !formComplete && !["form", "editor"].includes(tab.id);
+          const blockedByResult = !tab.always && !hasResult;
+          const disabled = blockedBySetup || blockedByResult;
+
           return (
             <button
               key={tab.id}
@@ -55,8 +59,8 @@ export default function Navbar({
           <option value="dramatic">Dramatic</option>
           <option value="journalistic">Journalistic</option>
         </select>
-        <button className="btn-primary" onClick={onAnalyze} disabled={loading}>
-          {loading ? "Analyzing..." : "Run Analysis"}
+        <button className="btn-primary" onClick={onAnalyze} disabled={loading || !formComplete}>
+          {!formComplete ? "Complete Setup" : loading ? "Analyzing..." : "Run Analysis"}
         </button>
       </div>
     </nav>
