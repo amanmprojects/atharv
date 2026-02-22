@@ -1,5 +1,15 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List
+from pathlib import Path
+from dotenv import load_dotenv
+
+
+BACKEND_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = BACKEND_ROOT.parent
+
+# Ensure backend/.env is loaded first and overrides root .env values when present.
+load_dotenv(BACKEND_ROOT / ".env", override=True)
+load_dotenv(REPO_ROOT / ".env", override=False)
 
 
 class Settings(BaseSettings):
@@ -15,12 +25,13 @@ class Settings(BaseSettings):
     ]
     ALLOWED_ORIGIN_REGEX: str = r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
 
-    LLM_PROVIDER: str = "openai"
+    LLM_PROVIDER: str = "gemini"
     OPENAI_API_KEY: str = ""
     OPENAI_BASE_URL: str = ""
     OPENAI_MODEL: str = "gpt-4o-mini"
     GEMINI_API_KEY: str = ""
-    GEMINI_MODEL: str = ""
+    GEMINI_BASE_URL: str = "https://generativelanguage.googleapis.com/v1beta/openai/"
+    GEMINI_MODEL: str = "gemini-2.0-flash"
     GOOGLE_NL_API_KEY: str = ""
     OPENAI_COMPAT_API_KEY: str = ""
     OPENAI_COMPAT_BASE_URL: str = ""
@@ -36,9 +47,8 @@ class Settings(BaseSettings):
     GOOGLE_CLOUD_REGION: str = "us-central1"
     FIREBASE_STORAGE_BUCKET: str = ""
 
-    class Config:
-        env_file = (".env", "backend/.env")
-        case_sensitive = True
-
-
+    model_config = SettingsConfigDict(
+        env_file=(str(BACKEND_ROOT / ".env"), str(REPO_ROOT / ".env")),
+        case_sensitive=True,
+    )
 settings = Settings()

@@ -1,3 +1,11 @@
+import warnings
+
+# Suppress noisy third-party dependency warnings to clean up backend logs
+warnings.filterwarnings("ignore", category=DeprecationWarning, message=".*BaseCommand.*")
+warnings.filterwarnings("ignore", category=DeprecationWarning, message=".*split_arg_string.*")
+warnings.filterwarnings("ignore", category=DeprecationWarning, message=".*__module__.*")
+warnings.filterwarnings("ignore", category=UserWarning)
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
