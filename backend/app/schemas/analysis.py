@@ -79,6 +79,8 @@ class Suggestion(BaseModel):
 class EmotionData(BaseModel):
     paragraph: int
     emotions: dict[str, float]
+    dominant_emotion: Optional[str] = None
+    intensity: Optional[float] = None
 
 
 class EmotionalArc(BaseModel):
@@ -86,6 +88,7 @@ class EmotionalArc(BaseModel):
     flat_zones: List[dict]
     pacing_scores: List[float]
     emotion_timeline: List[EmotionData]
+    statistics: Dict[str, Any] = {}
 
 
 class StyleFingerprint(BaseModel):
@@ -282,6 +285,7 @@ class AnalysisRequest(BaseModel):
     enable_seo: bool = False
     enable_accessibility: bool = False
     enable_knowledge_graph: bool = False
+    setup_context: dict = {}
 
 
 class AnalysisResponse(BaseModel):
@@ -302,6 +306,8 @@ class AnalysisResponse(BaseModel):
     accessibility: Optional[AccessibilityResponse] = None
     llm_calls_used: int = 0
     processing_time_ms: float
+    # Sidebar module counts — consumed directly by the frontend Editor.jsx panel
+    sidebar_modules: Optional[Dict[str, int]] = None
 
 
 class StyleTransformRequest(BaseModel):
