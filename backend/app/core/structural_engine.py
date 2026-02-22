@@ -334,10 +334,8 @@ class TransitionGapDetector:
         if self.similarity_provider != "openai":
             return
 
-        api_key = settings.OPENAI_API_KEY or settings.OPENAI_COMPAT_API_KEY
-        base_url = (
-            settings.OPENAI_BASE_URL.strip() or settings.OPENAI_COMPAT_BASE_URL.strip()
-        )
+        api_key = settings.OPENAI_API_KEY.strip()
+        base_url = settings.OPENAI_BASE_URL.strip()
         if not api_key:
             return
 
@@ -436,9 +434,12 @@ class TransitionGapDetector:
         if not self.embedding_task_type:
             return False
 
-        model_lower = self.embedding_model.lower()
-        base_url_lower = (self._embedding_base_url or "").lower()
-        return "gemini" in model_lower or "googleapis" in base_url_lower
+        base_url = (self._embedding_base_url or "").lower()
+        # Native OpenAI embeddings API does not accept `input_type`.
+        if "api.openai.com" in base_url:
+            return False
+
+        return bool(base_url)
 
     def _cosine_similarity(self, vector_a: List[float], vector_b: List[float]) -> float:
         if not vector_a or not vector_b:
