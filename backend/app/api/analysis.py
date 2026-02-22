@@ -73,6 +73,8 @@ async def analyze_text(request: AnalysisRequest):
     suggestions = []
     cloud_entities: List[Dict[str, Any]] = []
     cloud_sentiment: Optional[Dict[str, Any]] = None
+    narrative_result: Dict[str, Any] = {}
+    deep_result: Dict[str, Any] = {}
 
     if request.enable_narrative and request.enable_style:
         cloud_entities, cloud_sentiment = await asyncio.gather(
@@ -86,7 +88,7 @@ async def analyze_text(request: AnalysisRequest):
     
     # MODULE 1: Narrative Consistency Engine
     if request.enable_narrative:
-        narrative_result = narrative_engine.analyze(request.text)
+        narrative_result = narrative_engine.analyze(request.text)  # populated here
         local_characters = [
             CharacterInfo(
                 name=c["name"],
@@ -161,7 +163,7 @@ async def analyze_text(request: AnalysisRequest):
             _track_rule_trigger(rule)
     
     # MODULE 15: Deep Analysis Engine (grammar, tense, contradictions, pacing)
-    deep_result = deep_analyzer.analyze(request.text)
+    deep_result = deep_analyzer.analyze(request.text)  # always runs
     for issue in deep_result.get("suggestions", []):
         rule = issue.get("rule", "deep.unknown")
         severity_map = {"high": SeverityLevel.HIGH, "medium": SeverityLevel.MEDIUM, "low": SeverityLevel.LOW}
@@ -245,9 +247,63 @@ async def analyze_text(request: AnalysisRequest):
     if request.enable_accessibility:
         acc_result = accessibility_engine.analyze(request.text)
         accessibility = AccessibilityResponse(**acc_result)
+
+    # MODULE 16: Setup Context Alignment check
+    llm_calls_used = 0
+    if request.setup_context:
+        try:
+            setup_suggestions = await openai_client.generate_setup_suggestions(
+                request.text, request.setup_context
+            )
+            llm_calls_used += 1 if setup_suggestions else 0
+            for item in setup_suggestions:
+                rule = "setup.alignment"
+                suggestions.append(Suggestion(
+                    suggestion_id=f"sug_{uuid.uuid4().hex[:8]}",
+                    original_text=item.get("original_text", ""),
+                    modified_text=item.get("modified_text", ""),
+                    rule_triggered=rule,
+                    reason=item.get("reason", "Setup context adjustment"),
+                    confidence=0.85,
+                    improvement_score=0.8,
+                    source=SourceType.LLM_REWRITE,
+                    status=SuggestionStatus.PENDING,
+                    severity=SeverityLevel.HIGH,
+                ))
+                _track_rule_trigger(rule)
+        except Exception:
+            pass
     
     processing_time_ms = (time.time() - start_time) * 1000
-    
+
+    # ── Sidebar module counts: map each engine's output to the 7 frontend panels ──
+    _char_issue_set = {cont.entity for cont in contradictions}
+    _pacing_count = sum(
+        1 for s in deep_result.get("suggestions", [])
+        if "pacing" in s.get("rule", "")
+    )
+    _dialogue_pct = (
+        style_fingerprint.dialogue_percentage if style_fingerprint else 0.0
+    )
+    _dialogue_count = round(_dialogue_pct * stats["sentence_count"])
+    _plot_arc_types = {"timeline_error", "transition_gap", "logical_jump"}
+    _plot_arc_count = sum(
+        1 for i in narrative_result.get("issues", [])
+        if i.get("issue_type") in _plot_arc_types
+    )
+    sidebar_modules = {
+        "character_graph": sum(
+            1 for c in characters
+            if c.mention_count < 2 or c.name in _char_issue_set
+        ),
+        "consistency": len(contradictions),
+        "structure": len(structural_issues),
+        "pacing": _pacing_count,
+        "dialogue": _dialogue_count,
+        "genre_drift": 0,  # genre analysis not in main backend
+        "plot_arc": _plot_arc_count,
+    }
+
     # Track analytics
     analytics_store["total_analyses"] += 1
     analytics_store["total_suggestions"] += len(suggestions)
@@ -279,8 +335,9 @@ async def analyze_text(request: AnalysisRequest):
         knowledge_graph=knowledge_graph,
         seo_analysis=seo_analysis,
         accessibility=accessibility,
-        llm_calls_used=0,
-        processing_time_ms=round(processing_time_ms, 2)
+        llm_calls_used=llm_calls_used,
+        processing_time_ms=round(processing_time_ms, 2),
+        sidebar_modules=sidebar_modules,
     )
 
 
