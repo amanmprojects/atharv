@@ -3,13 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.api import analysis, documents, health, firebase_documents, ai
 from app.core.config import settings
-from app.services.gemini_client import gemini_client
+from app.services.openai_client import openai_client
 from app.services.cloud_language_client import cloud_language_client
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    gemini_client.initialize()
+    openai_client.initialize()
     cloud_language_client.initialize()
     yield
 

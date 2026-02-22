@@ -31,9 +31,7 @@ class CloudLanguageClient:
             self.credentials = None
 
         # Fallback for local/manual usage if ADC is unavailable.
-        configured_key = (
-            api_key or settings.GOOGLE_NL_API_KEY or settings.GEMINI_API_KEY
-        )
+        configured_key = api_key or settings.GOOGLE_NL_API_KEY
         if configured_key:
             self.api_key = configured_key
             self._initialized = True

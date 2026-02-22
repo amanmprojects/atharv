@@ -15,14 +15,17 @@ class Settings(BaseSettings):
     ]
     ALLOWED_ORIGIN_REGEX: str = r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
 
-    LLM_PROVIDER: str = "gemini"
+    LLM_PROVIDER: str = "openai"
+    OPENAI_API_KEY: str = ""
+    OPENAI_BASE_URL: str = ""
+    OPENAI_MODEL: str = "gpt-4o-mini"
     GEMINI_API_KEY: str = ""
+    GEMINI_MODEL: str = ""
     GOOGLE_NL_API_KEY: str = ""
-    GEMINI_MODEL: str = "gemini-1.5-flash"
     OPENAI_COMPAT_API_KEY: str = ""
     OPENAI_COMPAT_BASE_URL: str = ""
-    OPENAI_EMBEDDING_MODEL: str = "gemini-embedding-001"
-    OPENAI_EMBEDDING_INPUT_TYPE: str = "SEMANTIC_SIMILARITY"
+    OPENAI_EMBEDDING_MODEL: str = "text-embedding-3-small"
+    OPENAI_EMBEDDING_INPUT_TYPE: str = ""
 
     LLM_MAX_CALLS_PER_DOC: int = 10
     SIMILARITY_THRESHOLD: float = 0.85

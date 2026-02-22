@@ -1,3 +1,3 @@
-from app.services.gemini_client import gemini_client
+from app.services.openai_client import openai_client
 
-__all__ = ["gemini_client"]
+__all__ = ["openai_client"]

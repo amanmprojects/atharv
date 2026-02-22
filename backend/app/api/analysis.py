@@ -29,7 +29,7 @@ from app.core.comparative_analyzer import ComparativeAnalyzer
 from app.core.accessibility_engine import AccessibilityEngine
 from app.core.watermarking import StylometricWatermarker
 from app.core.deep_analysis_engine import DeepAnalysisEngine
-from app.services.gemini_client import gemini_client
+from app.services.openai_client import openai_client
 from app.services.cloud_language_client import cloud_language_client
 
 router = APIRouter()
@@ -288,7 +288,7 @@ async def analyze_text(request: AnalysisRequest):
 @router.post("/transform", response_model=StyleTransformResponse)
 async def transform_style(request: StyleTransformRequest):
     analytics_store["llm_calls_total"] += 1
-    result = await gemini_client.transform_style(
+    result = await openai_client.transform_style(
         text=request.text,
         style_mode=request.style_mode,
         intensity=request.intensity,

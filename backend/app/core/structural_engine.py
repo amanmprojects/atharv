@@ -243,6 +243,7 @@ class TransitionGapDetector:
         self._embedding_cache: Dict[str, List[float]] = {}
         self._embedding_cache_max_size = 2048
         self._embedding_client: Optional[Any] = None
+        self._embedding_base_url: Optional[str] = None
         self._embeddings_enabled = False
         self._initialize_embedding_provider()
     
@@ -330,24 +331,30 @@ class TransitionGapDetector:
         return bool(words & self.transition_words)
 
     def _initialize_embedding_provider(self) -> None:
-        if self.similarity_provider not in {"openai", "gemini"}:
+        if self.similarity_provider != "openai":
             return
 
-        api_key = settings.OPENAI_COMPAT_API_KEY or settings.GEMINI_API_KEY
-        if not api_key or not settings.OPENAI_COMPAT_BASE_URL:
+        api_key = settings.OPENAI_API_KEY or settings.OPENAI_COMPAT_API_KEY
+        base_url = (
+            settings.OPENAI_BASE_URL.strip() or settings.OPENAI_COMPAT_BASE_URL.strip()
+        )
+        if not api_key:
             return
 
         try:
             from openai import OpenAI
 
-            self._embedding_client = OpenAI(
-                api_key=api_key,
-                base_url=settings.OPENAI_COMPAT_BASE_URL,
-            )
+            client_kwargs = {"api_key": api_key}
+            if base_url:
+                client_kwargs["base_url"] = base_url
+
+            self._embedding_client = OpenAI(**client_kwargs)
+            self._embedding_base_url = base_url or None
             self._embeddings_enabled = True
         except Exception:
             self._embeddings_enabled = False
             self._embedding_client = None
+            self._embedding_base_url = None
 
     def _embedding_similarities(
         self, boundaries: List[Tuple[str, str]]
@@ -407,16 +414,31 @@ class TransitionGapDetector:
 
         for attempt in range(retries):
             try:
+                request_kwargs = {
+                    "model": self.embedding_model,
+                    "input": texts,
+                }
+                if self._should_send_embedding_input_type():
+                    request_kwargs["extra_body"] = {
+                        "input_type": self.embedding_task_type
+                    }
+
                 return self._embedding_client.embeddings.create(
-                    model=self.embedding_model,
-                    input=texts,
-                    extra_body={"input_type": self.embedding_task_type},
+                    **request_kwargs
                 )
             except Exception:
                 if attempt == retries - 1:
                     raise
                 wait_time = backoff_seconds * (2 ** attempt)
                 time.sleep(wait_time)
+
+    def _should_send_embedding_input_type(self) -> bool:
+        if not self.embedding_task_type:
+            return False
+
+        model_lower = self.embedding_model.lower()
+        base_url_lower = (self._embedding_base_url or "").lower()
+        return "gemini" in model_lower or "googleapis" in base_url_lower
 
     def _cosine_similarity(self, vector_a: List[float], vector_b: List[float]) -> float:
         if not vector_a or not vector_b:
