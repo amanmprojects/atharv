@@ -1,154 +1,334 @@
 """
-Scene illustration pipeline.
-Default mode is mock (prompt + generated placeholder image URL).
+Scene prompt builder + image generation (mock/stability/dalle).
 """
 
 from __future__ import annotations
 
-import html
+import base64
+import json
+import os
 import re
-import urllib.parse
+import urllib.error
+import urllib.request
+from typing import Any, Dict, List
 
 
-GENRE_STYLE_MAP = {
-    "thriller": "cinematic, high contrast lighting, dramatic shadows",
-    "mystery": "moody noir composition, focused highlights, investigative atmosphere",
-    "romance": "soft warm lighting, intimate framing, gentle bokeh",
-    "fantasy": "epic painterly composition, magical atmosphere, rich world detail",
-    "comedy": "bright expressive palette, lively framing, playful mood",
-    "literary": "naturalistic composition, subtle texture, contemplative mood",
-    "horror": "dark desaturated palette, eerie shadows, unsettling atmosphere",
+LOCATION_WORDS = {
+    "room", "forest", "street", "alley", "office", "house", "apartment", "bridge", "station", "school",
+    "court", "hospital", "market", "harbor", "hallway", "kitchen", "library", "rooftop", "desert", "mountain",
+}
+COLOR_WORDS = {
+    "red", "blue", "green", "gold", "silver", "black", "white", "purple", "amber", "scarlet", "crimson",
+    "cyan", "orange", "pink", "gray", "grey", "teal", "indigo",
+}
+STRONG_VERBS = {
+    "run", "rush", "slam", "grab", "chase", "fight", "stare", "whisper", "shout", "smash", "burst", "freeze",
+    "crawl", "glare", "march", "dodge", "lunge", "climb", "fall", "spin", "charge",
 }
 
 
-class ScenePromptBuilder:
-    LOCATION_WORDS = {
-        "room", "hall", "corridor", "street", "forest", "city", "house", "road", "bridge",
-        "river", "station", "school", "office", "hospital", "court", "market", "temple",
-    }
-    LIGHT_WORDS = {"dark", "dim", "glow", "sunlight", "moonlight", "shadow", "fog", "rain", "mist"}
-    ACTION_WORDS = {
-        "run", "rush", "fight", "grab", "fall", "chase", "whisper", "scream", "stare",
-        "smile", "cry", "open", "close", "turn", "hide", "kneel", "climb",
-    }
+GENRE_STYLE_MAP = {
+    "thriller": "cinematic noir, high contrast shadows, dramatic lighting",
+    "romance": "soft golden hour lighting, warm tones, shallow depth of field",
+    "fantasy": "epic painterly, magical atmosphere, volumetric light",
+    "horror": "dark desaturated, eerie fog, deep shadows, ominous",
+    "mystery": "moody blue tones, film grain, detective aesthetic",
+    "comedy": "bright saturated colors, dynamic poses, expressive",
+    "literary": "artistic, muted palette, thoughtful composition",
+    "journalistic": "documentary style, neutral tones, realistic",
+}
 
-    def extract_visual_sentence(self, paragraph):
-        sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", paragraph) if s.strip()]
+ART_STYLE_MAP = {
+    "photorealistic": "photorealistic, 8K, hyperdetailed, cinematic photograph",
+    "illustrated": "illustrated novel style, detailed ink linework, book cover art",
+    "watercolor": "watercolor painting, soft washes, artistic, expressive",
+    "comic": "comic book style, bold outlines, cel shading, dynamic panels",
+    "concept_art": "concept art, digital painting, ArtStation, professional",
+}
+
+AVAILABLE_IMAGE_STYLES = [
+    {"id": "photorealistic", "label": "Photorealistic"},
+    {"id": "illustrated", "label": "Illustrated"},
+    {"id": "watercolor", "label": "Watercolour"},
+    {"id": "comic", "label": "Comic"},
+    {"id": "concept_art", "label": "Concept Art"},
+]
+
+
+class ScenePromptBuilder:
+    def build_prompt(
+        self,
+        paragraph: str,
+        para_index: int,
+        char_result: Dict[str, Any],
+        pacing_data: List[Dict[str, Any]],
+        genre: str,
+        art_style: str,
+    ) -> Dict[str, Any]:
+        visual_sentence = self._extract_visual_sentence(paragraph, char_result)
+        char_desc = self._build_character_desc(paragraph, para_index, char_result)
+        pacing_score = self._pacing_score_for_paragraph(para_index, pacing_data)
+        mood_desc = self._mood_from_pacing(pacing_score)
+
+        genre_style = GENRE_STYLE_MAP.get(str(genre or "").lower(), "cinematic storytelling composition")
+        art_style_text = ART_STYLE_MAP.get(str(art_style or "illustrated").lower(), ART_STYLE_MAP["illustrated"])
+
+        full_prompt = f"{visual_sentence}, {char_desc}, {mood_desc}, {genre_style}, {art_style_text}"
+        negative_prompt = "blurry, low quality, deformed, watermark, text, logo, ugly, bad anatomy"
+
+        return {
+            "paragraph_index": para_index,
+            "text_preview": paragraph[:80],
+            "visual_sentence": visual_sentence,
+            "char_desc": char_desc,
+            "mood_desc": mood_desc,
+            "genre_style": genre_style,
+            "art_style": art_style_text,
+            "full_prompt": full_prompt,
+            "negative_prompt": negative_prompt,
+            "pacing_score": pacing_score,
+        }
+
+    def _extract_visual_sentence(self, paragraph: str, char_result: Dict[str, Any]) -> str:
+        sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", paragraph.strip()) if s.strip()]
         if not sentences:
             return paragraph.strip()
 
-        def score(sentence):
-            tokens = set(re.findall(r"\b[a-z]+\b", sentence.lower()))
-            scene_hits = len(tokens & self.LOCATION_WORDS)
-            light_hits = len(tokens & self.LIGHT_WORDS)
-            action_hits = len(tokens & self.ACTION_WORDS)
-            return scene_hits * 2 + light_hits * 2 + action_hits + min(len(tokens) / 20.0, 1.0)
+        names = set((char_result or {}).get("characters", {}).keys())
+
+        def score(sentence: str) -> float:
+            tokens = re.findall(r"\b[a-zA-Z']+\b", sentence.lower())
+            token_set = set(tokens)
+            location_score = sum(2.0 for token in token_set if token in LOCATION_WORDS)
+            color_score = sum(1.5 for token in token_set if token in COLOR_WORDS)
+            action_score = sum(1.0 for token in token_set if token in STRONG_VERBS)
+            character_score = 0.0
+            for name in names:
+                if name.lower() in sentence.lower():
+                    character_score += 1.0
+            return location_score + color_score + action_score + character_score
 
         ranked = sorted(sentences, key=score, reverse=True)
         return ranked[0]
 
-    def _character_descriptions(self, paragraph, character_summary):
-        if not character_summary:
-            return "no named character details available"
-
+    def _build_character_desc(self, paragraph: str, para_index: int, char_result: Dict[str, Any]) -> str:
+        characters_map = (char_result or {}).get("characters", {})
+        paragraphs = (char_result or {}).get("paragraphs", [])
         paragraph_lower = paragraph.lower()
-        snippets = []
-        for character, summary in character_summary.items():
-            if character.lower() not in paragraph_lower:
+
+        mentioned = [name for name in characters_map.keys() if name.lower() in paragraph_lower]
+        if not mentioned:
+            return "No visible character foregrounded, focus on environment and mood"
+
+        history_text = "\n".join(paragraphs[: max(0, para_index - 1)]) if isinstance(paragraphs, list) else ""
+        parts = []
+
+        for name in mentioned[:3]:
+            desc = self._extract_description_for_name(name, history_text)
+            if not desc:
+                desc = self._default_desc_for_name(name, len(characters_map.get(name, [])), len(paragraphs) or 1)
+            parts.append(f"{name}: {desc}")
+
+        return "; ".join(parts)
+
+    def _extract_description_for_name(self, name: str, history_text: str) -> str:
+        if not history_text:
+            return ""
+        patterns = [
+            rf"{re.escape(name)}\s+(?:was|is|had|wore)\s+([^.,;!?:]{{3,80}})",
+            rf"{re.escape(name)}\s*,\s*a[n]?\s+([^.,;!?:]{{3,80}})",
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, history_text, flags=re.IGNORECASE)
+            if match:
+                return match.group(1).strip()
+        return ""
+
+    def _default_desc_for_name(self, name: str, appearances: int, total_paragraphs: int) -> str:
+        ratio = appearances / max(total_paragraphs, 1)
+        if ratio >= 0.6:
+            return "central character, expressive face, detailed outfit"
+        if ratio >= 0.2:
+            return "supporting character, readable silhouette"
+        return "background character, minimal detail"
+
+    def _pacing_score_for_paragraph(self, para_index: int, pacing_data: List[Dict[str, Any]]) -> float:
+        for row in pacing_data or []:
+            if int(row.get("paragraph", 0)) == para_index:
+                return float(row.get("pacing_score", 0.0))
+        return 0.0
+
+    def _mood_from_pacing(self, pacing_score: float) -> str:
+        if pacing_score >= 7:
+            return "tense, high energy, dynamic composition, Dutch angle camera"
+        if pacing_score >= 4:
+            return "moderate tension, balanced composition, eye-level"
+        return "calm, contemplative, wide shot, peaceful"
+
+
+class ImageGenerator:
+    def __init__(self) -> None:
+        self.builder = ScenePromptBuilder()
+
+    def generate(self, prompt_data: Dict[str, Any], mode: str = "mock") -> Dict[str, Any]:
+        mode = (mode or "mock").lower()
+        if mode == "mock":
+            return {
+                **prompt_data,
+                "image_url": None,
+                "status": "mock",
+                "sd_prompt_summary": self._stable_diffusion_summary(prompt_data),
+            }
+
+        if mode == "stability":
+            try:
+                image_data_uri = self._generate_stability(prompt_data)
+                return {
+                    **prompt_data,
+                    "image_url": image_data_uri,
+                    "status": "generated",
+                    "sd_prompt_summary": self._stable_diffusion_summary(prompt_data),
+                }
+            except Exception as exc:  # noqa: BLE001
+                return {
+                    **prompt_data,
+                    "image_url": None,
+                    "status": "mock",
+                    "error": str(exc),
+                    "sd_prompt_summary": self._stable_diffusion_summary(prompt_data),
+                }
+
+        if mode == "dalle":
+            try:
+                image_url = self._generate_dalle(prompt_data)
+                return {
+                    **prompt_data,
+                    "image_url": image_url,
+                    "status": "generated",
+                    "sd_prompt_summary": self._stable_diffusion_summary(prompt_data),
+                }
+            except Exception as exc:  # noqa: BLE001
+                return {
+                    **prompt_data,
+                    "image_url": None,
+                    "status": "mock",
+                    "error": str(exc),
+                    "sd_prompt_summary": self._stable_diffusion_summary(prompt_data),
+                }
+
+        return {
+            **prompt_data,
+            "image_url": None,
+            "status": "mock",
+            "sd_prompt_summary": self._stable_diffusion_summary(prompt_data),
+        }
+
+    def generate_all(
+        self,
+        text: str,
+        char_result: Dict[str, Any],
+        pacing_res: Dict[str, Any],
+        genre: str,
+        art_style: str,
+        mode: str = "mock",
+    ) -> List[Dict[str, Any]]:
+        paragraphs = [p.strip() for p in (text or "").split("\n\n") if p.strip()]
+        pacing_rows = pacing_res.get("pacing", []) if isinstance(pacing_res, dict) else (pacing_res or [])
+
+        results = []
+        for idx, paragraph in enumerate(paragraphs, start=1):
+            word_count = len(re.findall(r"\b\w+\b", paragraph))
+            if word_count < 20:
                 continue
-            emotions = summary.get("emotional_states") or []
-            locations = summary.get("locations_mentioned") or []
-            emotion_hint = f"showing {emotions[0]} emotion" if emotions else "with neutral expression"
-            location_hint = f"associated with {locations[0]}" if locations else "in the current scene"
-            snippets.append(f"{character} ({emotion_hint}, {location_hint})")
+            prompt_data = self.builder.build_prompt(paragraph, idx, char_result, pacing_rows, genre, art_style)
+            results.append(self.generate(prompt_data, mode=mode))
+        return results
 
-        if not snippets:
-            return "focus on environment and implied protagonist"
-        return "; ".join(snippets[:3])
-
-    def _mood_from_pacing(self, pacing_score):
-        if pacing_score >= 6.5:
-            return "tense, high energy, dynamic camera angle, slight motion blur"
-        if pacing_score >= 4.3:
-            return "balanced dramatic energy, grounded framing"
-        return "calm, contemplative, still frame, atmospheric detail"
-
-    def build_prompt(self, paragraph, character_summary, pacing_score, genre, art_style):
-        visual_sentence = self.extract_visual_sentence(paragraph)
-        chars = self._character_descriptions(paragraph, character_summary)
-        mood = self._mood_from_pacing(float(pacing_score or 0))
-        genre_style = GENRE_STYLE_MAP.get(str(genre).lower(), "cinematic composition")
+    def _stable_diffusion_summary(self, prompt_data: Dict[str, Any]) -> str:
         return (
-            f"{visual_sentence}, {chars}, {mood}, {genre_style}, "
-            f"{art_style}, highly detailed, storytelling illustration"
+            f"PROMPT: {prompt_data.get('full_prompt', '')}\n"
+            f"NEGATIVE: {prompt_data.get('negative_prompt', '')}\n"
+            "CFG: 7 | STEPS: 30 | SIZE: 768x512"
         )
 
+    def _generate_stability(self, prompt_data: Dict[str, Any]) -> str:
+        api_key = os.getenv("STABILITY_API_KEY", "").strip()
+        if not api_key:
+            raise RuntimeError("STABILITY_API_KEY not set")
 
-def _mock_image_data_url(paragraph_idx, prompt, art_style):
-    safe_prompt = html.escape(prompt[:130])
-    safe_style = html.escape((art_style or "cinematic").title())
-    svg = f"""
-<svg xmlns='http://www.w3.org/2000/svg' width='960' height='540'>
-  <defs>
-    <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
-      <stop offset='0%' stop-color='#dbeafe'/>
-      <stop offset='60%' stop-color='#f8fafc'/>
-      <stop offset='100%' stop-color='#e2e8f0'/>
-    </linearGradient>
-  </defs>
-  <rect width='100%' height='100%' fill='url(#g)' />
-  <rect x='36' y='36' width='888' height='468' fill='none' stroke='#94a3b8' stroke-width='2' rx='16' />
-  <text x='64' y='96' font-size='32' font-family='Georgia, serif' fill='#0f172a'>Scene {paragraph_idx}</text>
-  <text x='64' y='136' font-size='20' font-family='Georgia, serif' fill='#1e293b'>Style: {safe_style}</text>
-  <text x='64' y='190' font-size='18' font-family='Georgia, serif' fill='#334155'>Prompt Preview:</text>
-  <foreignObject x='64' y='208' width='832' height='250'>
-    <div xmlns='http://www.w3.org/1999/xhtml' style='font-size:16px;line-height:1.35;color:#334155;font-family:Georgia,serif'>
-      {safe_prompt}
-    </div>
-  </foreignObject>
-  <text x='64' y='486' font-size='14' font-family='Georgia, serif' fill='#64748b'>Mock image mode (no paid API call)</text>
-</svg>
-""".strip()
-    return "data:image/svg+xml;charset=utf-8," + urllib.parse.quote(svg)
+        payload = {
+            "text_prompts": [
+                {"text": prompt_data["full_prompt"], "weight": 1},
+                {"text": prompt_data["negative_prompt"], "weight": -1},
+            ],
+            "cfg_scale": 7,
+            "height": 512,
+            "width": 768,
+            "steps": 30,
+            "samples": 1,
+        }
+
+        req = urllib.request.Request(
+            "https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            method="POST",
+        )
+
+        try:
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                body = json.loads(resp.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            detail = exc.read().decode("utf-8", errors="ignore") if hasattr(exc, "read") else str(exc)
+            raise RuntimeError(f"Stability API failed: {detail[:250]}") from exc
+
+        artifacts = body.get("artifacts") or []
+        if not artifacts:
+            raise RuntimeError("Stability API returned no artifacts")
+        b64 = artifacts[0].get("base64")
+        if not b64:
+            raise RuntimeError("Stability API artifact missing base64 image")
+        return f"data:image/png;base64,{b64}"
+
+    def _generate_dalle(self, prompt_data: Dict[str, Any]) -> str:
+        api_key = os.getenv("OPENAI_API_KEY", "").strip()
+        if not api_key:
+            raise RuntimeError("OPENAI_API_KEY not set")
+
+        try:
+            from openai import OpenAI
+        except Exception as exc:  # noqa: BLE001
+            raise RuntimeError("openai package not installed") from exc
+
+        client = OpenAI(api_key=api_key)
+        result = client.images.generate(
+            model="dall-e-3",
+            prompt=prompt_data["full_prompt"],
+            size="1024x1024",
+            quality="standard",
+            n=1,
+        )
+        if not result.data:
+            raise RuntimeError("DALL-E returned no image")
+        return result.data[0].url
 
 
 def build_scene_cards(
-    paragraphs,
-    pacing_rows,
-    dominant_genre,
-    art_style,
-    character_summary,
-    mode="mock",
-):
-    builder = ScenePromptBuilder()
-    cards = []
-
-    pace_by_paragraph = {int(row.get("paragraph", 0)): row for row in (pacing_rows or [])}
-    style_value = art_style or "cinematic"
-    image_mode = (mode or "mock").lower()
-
-    for idx, paragraph in enumerate(paragraphs, start=1):
-        if not paragraph.strip():
-            continue
-        pacing_score = float(pace_by_paragraph.get(idx, {}).get("pacing_score", 0))
-        prompt = builder.build_prompt(
-            paragraph=paragraph,
-            character_summary=character_summary or {},
-            pacing_score=pacing_score,
-            genre=dominant_genre or "unknown",
-            art_style=style_value,
-        )
-
-        cards.append(
-            {
-                "paragraph": idx,
-                "source_text": paragraph[:300],
-                "prompt": prompt,
-                "art_style": style_value,
-                "mode": image_mode,
-                "image_url": _mock_image_data_url(idx, prompt, style_value),
-                "status": "generated" if image_mode == "mock" else "queued",
-            }
-        )
-
-    return cards
+    paragraphs: List[str],
+    pacing_rows: List[Dict[str, Any]],
+    dominant_genre: str,
+    art_style: str,
+    character_summary: Dict[str, Any],
+    mode: str = "mock",
+) -> List[Dict[str, Any]]:
+    generator = ImageGenerator()
+    text = "\n\n".join(paragraphs or [])
+    char_result = {
+        "characters": {name: summary.get("appears_in_paragraphs", []) for name, summary in (character_summary or {}).items()},
+        "paragraphs": paragraphs or [],
+    }
+    pacing_res = {"pacing": pacing_rows or []}
+    return generator.generate_all(text, char_result, pacing_res, dominant_genre, art_style, mode)

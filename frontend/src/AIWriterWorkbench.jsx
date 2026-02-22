@@ -11,10 +11,14 @@ import DialogueView from "./components/DialogueView";
 import Dashboard from "./components/Dashboard";
 import Navbar from "./components/Navbar";
 import ExplainabilityView from "./components/ExplainabilityView";
+import InputForm from "./components/InputForm";
+import TrendsView from "./components/TrendsView";
+import CharacterTimeline from "./components/CharacterTimeline";
+import IllustrationsView from "./components/IllustrationsView";
 import { analyzeText, healthCheck } from "./api/client";
 import "./App.css";
 
-const VALID_VIEWS = new Set(["editor", "universe", "consistency", "pacing", "vibe", "arc", "genre", "dialogue", "explain", "issues"]);
+const VALID_VIEWS = new Set(["editor", "universe", "consistency", "pacing", "vibe", "arc", "genre", "dialogue", "explain", "issues", "form", "trends", "timeline", "illustrations"]);
 
 export default function AIWriterWorkbench({ initialView = "editor" }) {
   const [text, setText] = useState("");
@@ -26,6 +30,9 @@ export default function AIWriterWorkbench({ initialView = "editor" }) {
   );
   const [style, setStyle] = useState("formal");
   const [backendOnline, setBackendOnline] = useState(true);
+  const [context, setContext] = useState({});
+  const [formComplete, setFormComplete] = useState(false);
+  const [images, setImages] = useState([]);
 
   const checkBackend = useCallback(async () => {
     try {
@@ -159,6 +166,38 @@ export default function AIWriterWorkbench({ initialView = "editor" }) {
         )}
         {activeView === "explain" && result && <ExplainabilityView result={result} />}
         {activeView === "issues" && result && <IssuePanel report={result.report} />}
+        {activeView === "form" && (
+          <InputForm
+            onComplete={(ctx) => {
+              setContext(ctx);
+              setFormComplete(true);
+              setActiveView("editor");
+            }}
+            initialContext={context}
+          />
+        )}
+        {activeView === "trends" && result && (
+          <TrendsView
+            trendData={result.trend_data || {}}
+            genre={result.dominant_genre || "unknown"}
+          />
+        )}
+        {activeView === "timeline" && result && (
+          <CharacterTimeline
+            heatmapData={result.heatmap_data || {}}
+            profiles={result.character_profiles || []}
+            predictions={result.character_predictions || []}
+            phaseColors={result.phase_colors || {}}
+            issues={result.timeline_issues || []}
+          />
+        )}
+        {activeView === "illustrations" && result && (
+          <IllustrationsView
+            result={result}
+            images={images}
+            setImages={setImages}
+          />
+        )}
 
         {activeView !== "editor" && !result && (
           <div className="empty-state">

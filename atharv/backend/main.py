@@ -23,8 +23,9 @@ from genre_detector      import GenreDetector
 from plot_arc            import PlotArcDetector
 from llm_verifier        import MinimalLLMVerifier
 from context_manager     import ContextManager
-from trend_matcher       import match_trends
-from image_generator     import build_scene_cards
+from trend_matcher       import match_trends, TrendMatcher
+from image_generator     import build_scene_cards, ImageGenerator, AVAILABLE_IMAGE_STYLES
+from character_timeline  import CharacterTimeline
  
 app = FastAPI(title="AI Writer — DevHacks 2026", version="2.0.0")
 app.add_middleware(
@@ -43,6 +44,9 @@ _dialogue    = DialogueVoiceChecker()
 _genre       = GenreDetector()
 _plot_arc    = PlotArcDetector()
 _context_mgr = ContextManager()
+_trend_matcher = TrendMatcher()
+_image_generator = ImageGenerator()
+_char_timeline = CharacterTimeline()
 USE_LLM_REVIEW = os.getenv("USE_LLM_REVIEW", "false").lower() == "true"
 LLM_REVIEW_MODEL = os.getenv("LLM_REVIEW_MODEL", "qwen2.5:14b")
 LLM_REVIEW_ENDPOINT = os.getenv("LLM_REVIEW_ENDPOINT", "http://127.0.0.1:11434/api/generate")
@@ -66,6 +70,13 @@ class AnalyzeRequest(BaseModel):
     context             : Optional[Dict[str, Any]] = None
     image_mode          : Optional[str] = "mock"
     art_style           : Optional[str] = "cinematic"
+
+
+class GenerateImagesRequest(BaseModel):
+    text: str
+    art_style: Optional[str] = "illustrated"
+    mode: Optional[str] = "mock"
+    analysis_result: Optional[Dict[str, Any]] = None
  
  
 @app.post("/analyze")
@@ -76,8 +87,9 @@ async def analyze(req: AnalyzeRequest):
         text       = req.text
         paragraphs = [p.strip() for p in text.split('\n\n') if p.strip()]
         context = _context_mgr.normalize(req.context or {})
+        thresholds = _context_mgr.adjust_thresholds(context)
         pacing_target = _context_mgr.pacing_target(context)
-        show_tell_policy = _context_mgr.show_tell_policy(context)
+        show_tell_policy = thresholds.get("show_tell_policy", _context_mgr.show_tell_policy(context))
         inferred_style = _context_mgr.style_hint(context)
         style_choice = req.target_style or inferred_style
  
@@ -95,14 +107,19 @@ async def analyze(req: AnalyzeRequest):
             char_result.get('characters', {}),
             plot_arc_res.get('arc_map', []),
         )
-        market_trends   = match_trends(
-            genre=genre_res.get('dominant_genre', 'unknown'),
-            text=text,
-            pacing_rows=pacing_res.get('pacing', []),
-            genre_rows=genre_res.get('per_paragraph', []),
-            dialogue_profiles=dialogue_res.get('profiles', {}),
-            context=context,
-        )
+        detailed_timeline_res = _char_timeline.analyze(char_result, plot_arc_res, len(paragraphs))
+
+        detected_props = {
+            'pacing_label': (pacing_res.get('pacing', [])[-1].get('label') if pacing_res.get('pacing') else 'Moderate'),
+            'dominant_genre': genre_res.get('dominant_genre', 'unknown'),
+            'readability_score': structure_res.get('readability_score', 0),
+            'show_tell_count': len(show_tell_res),
+            'avg_sentence_len': structure_res.get('avg_sentence_len', 0),
+            'dialogue_count': len(dialogue_res.get('dialogues', {})),
+        }
+        user_genre = context.get('genre', genre_res.get('dominant_genre', 'unknown')) if context else genre_res.get('dominant_genre', 'unknown')
+        trend_res = _trend_matcher.analyze(str(user_genre), detected_props, text)
+        market_trends = trend_res
         art_style = (req.art_style or context.get("tone", {}).get("art_style") or "cinematic").strip().lower()
         image_mode = (req.image_mode or "mock").strip().lower()
         illustrations = build_scene_cards(
@@ -140,9 +157,12 @@ async def analyze(req: AnalyzeRequest):
                 'message': gap,
                 'suggestion': 'Consider this change if it fits your story intent and voice.',
             }
-            for gap in market_trends.get('gaps', [])[:3]
+            for gap in [item.get('name') for item in trend_res.get('missing_tropes', [])][:3]
         ])
+        all_issues.extend(detailed_timeline_res.get('issues', []))
         all_issues.extend(_input_quality_checks(text, paragraphs))
+        all_issues.extend(_context_specific_issues(text, context, thresholds))
+        _apply_context_severity_overrides(all_issues, context, thresholds)
  
         sev = {'high':0,'medium':1,'low':2}
         all_issues.sort(key=lambda x: sev.get(x.get('severity','low'), 2))
@@ -205,6 +225,7 @@ async def analyze(req: AnalyzeRequest):
             'context_adaptations': {
                 'pacing_target': pacing_target,
                 'show_dont_tell_policy': show_tell_policy,
+                'thresholds': thresholds,
                 'style_selected': style_choice,
                 'style_inferred': inferred_style,
                 'image_mode': image_mode,
@@ -252,9 +273,16 @@ async def analyze(req: AnalyzeRequest):
             'arc_issues'           : plot_arc_res.get('issues', []),
             'phase_colors'         : plot_arc_res.get('phase_colors', {}),
             'character_timeline'   : timeline_res,
+            'character_profiles'   : detailed_timeline_res.get('character_profiles', []),
+            'timeline_grid'        : detailed_timeline_res.get('timeline_grid', []),
+            'heatmap_data'         : detailed_timeline_res.get('heatmap_data', {}),
+            'character_predictions': detailed_timeline_res.get('predictions', []),
+            'timeline_issues'      : detailed_timeline_res.get('issues', []),
             'market_trends'        : market_trends,
+            'trend_data'           : trend_res,
             'illustrations'        : illustrations,
             'analysis_context'     : _context_mgr.summarize(context),
+            'user_context'         : context,
             'report'               : report,
             'enhanced_text'        : style_res.get('enhanced', text),
             'pipeline_mix'         : report['pipeline_mix'],
@@ -365,6 +393,75 @@ def _input_quality_checks(text, paragraphs):
     return issues
 
 
+def _context_specific_issues(text, context, thresholds):
+    issues = []
+    lower = (text or "").lower()
+
+    # YA content filter
+    if thresholds.get("flag_ya_adult_terms"):
+        adult_terms = [
+            "explicit",
+            "graphic sex",
+            "drug abuse",
+            "hard drugs",
+            "pornographic",
+            "gore",
+            "beheaded",
+        ]
+        hits = [term for term in adult_terms if term in lower]
+        if hits:
+            issues.append(
+                {
+                    "category": "Content Safety",
+                    "severity": "high",
+                    "message": f"Potentially mature content found for YA audience: {', '.join(hits[:3])}.",
+                    "suggestion": "Tone down or contextualize mature details for YA target readers.",
+                }
+            )
+
+    # Beginner reading level sentence-length check.
+    long_limit = int(thresholds.get("long_sentence_limit", 45))
+    if long_limit < 45:
+        sentences = re.split(r"(?<=[.!?])\s+", text or "")
+        for sentence in sentences:
+            wc = len(sentence.split())
+            if wc > long_limit:
+                issues.append(
+                    {
+                        "category": "Readability",
+                        "severity": "medium",
+                        "message": f"Long sentence ({wc} words) exceeds beginner threshold ({long_limit}).",
+                        "suggestion": "Split long sentences for easier comprehension.",
+                    }
+                )
+                break
+
+    # Genre-specific readability tolerance.
+    readability_min = float(thresholds.get("readability_min", 55))
+    if readability_min > 0:
+        # handled indirectly in StructureAnalyzer output; add advisory only when severe
+        pass
+
+    return issues
+
+
+def _apply_context_severity_overrides(all_issues, context, thresholds):
+    ctx = context or {}
+    genre = str(ctx.get("genre", "")).lower()
+
+    # Thriller: flag passive voice harder.
+    if "thriller" in genre:
+        for issue in all_issues:
+            text = f"{issue.get('issue', '')} {issue.get('message', '')}".lower()
+            if "passive voice" in text and issue.get("severity", "low") == "low":
+                issue["severity"] = "medium"
+
+    # First draft: gentle feedback
+    if thresholds.get("soften_all_severity"):
+        for issue in all_issues:
+            issue["severity"] = "low"
+
+
 def _select_issues_for_llm(all_issues):
     """
     Select only a small, high-value subset for optional LLM review.
@@ -416,6 +513,41 @@ def _blend_issue_severity(issue, confidence):
             issue['severity'] = 'medium'
         elif current == 'medium':
             issue['severity'] = 'low'
+
+
+@app.post("/generate-images")
+async def generate_images(req: GenerateImagesRequest):
+    if not req.text or len(req.text.strip()) < 2:
+        raise HTTPException(status_code=400, detail="Text is empty")
+
+    try:
+        analysis = req.analysis_result or {}
+        paragraphs = [p.strip() for p in req.text.split('\n\n') if p.strip()]
+        char_result = {
+            'characters': analysis.get('characters', {}),
+            'paragraphs': paragraphs,
+        }
+        pacing_res = {'pacing': analysis.get('pacing', [])}
+        dominant_genre = analysis.get('dominant_genre', 'unknown')
+        art_style = (req.art_style or 'illustrated').strip().lower()
+        mode = (req.mode or 'mock').strip().lower()
+
+        images = _image_generator.generate_all(
+            text=req.text,
+            char_result=char_result,
+            pacing_res=pacing_res,
+            genre=dominant_genre,
+            art_style=art_style,
+            mode=mode,
+        )
+        return {'images': images}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/image-styles")
+async def image_styles():
+    return {'styles': AVAILABLE_IMAGE_STYLES}
  
  
 @app.get("/health")

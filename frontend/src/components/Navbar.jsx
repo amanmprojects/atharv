@@ -9,16 +9,20 @@ export default function Navbar({
   backendOnline,
 }) {
   const tabs = [
-    { id: "editor", label: "Editor", always: true },
-    { id: "universe", label: "Character Universe" },
-    { id: "consistency", label: "Consistency" },
-    { id: "pacing", label: "Pacing" },
-    { id: "vibe", label: "Vibe Graph" },
-    { id: "arc", label: "Plot Arc" },
-    { id: "genre", label: "Genre Profile" },
-    { id: "dialogue", label: "Dialogue Voice" },
-    { id: "explain", label: "Explainability" },
-    { id: "issues", label: "Issues" },
+    { id: "editor", label: "📝 Editor", always: true },
+    { id: "form", label: "📋 Setup", always: true },
+    { id: "universe", label: "🌐 Universe" },
+    { id: "timeline", label: "📅 Timeline" },
+    { id: "consistency", label: "✓ Consistency" },
+    { id: "pacing", label: "📈 Pacing" },
+    { id: "vibe", label: "🎨 Vibe" },
+    { id: "arc", label: "📊 Arc" },
+    { id: "genre", label: "🎭 Genre" },
+    { id: "dialogue", label: "💬 Dialogue" },
+    { id: "trends", label: "📍 Trends" },
+    { id: "illustrations", label: "🎨 Illustrations" },
+    { id: "explain", label: "🔍 Explain" },
+    { id: "issues", label: "⚠️ Issues" },
   ];
 
   return (
