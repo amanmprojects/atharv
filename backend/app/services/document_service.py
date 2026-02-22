@@ -2,6 +2,7 @@ import json
 import uuid
 from datetime import datetime
 from typing import List, Optional, Dict, Any
+from google.api_core.exceptions import NotFound
 from google.cloud.firestore import Client as FirestoreClient
 from google.cloud.storage import Bucket
 
@@ -11,13 +12,45 @@ from app.services.firebase_service import get_firestore_client, get_storage_buck
 class DocumentService:
     def __init__(self):
         self.db: FirestoreClient = get_firestore_client()
-        self.bucket: Bucket = get_storage_bucket()
+        self.bucket: Optional[Bucket] = get_storage_bucket()
         self.collection = "documents"
         self.content_collection = "document_content"
+
+    def _is_storage_available(self) -> bool:
+        return self.bucket is not None
 
     @staticmethod
     def _primary_content_path(doc_id: str) -> str:
         return f"documents/{doc_id}/content.json"
+
+    def _content_doc_ref(self, doc_id: str):
+        return self.db.collection(self.content_collection).document(doc_id)
+
+    async def _save_content_firestore(self, doc_id: str, content: Dict[str, Any]) -> bool:
+        try:
+            self._content_doc_ref(doc_id).set(
+                {
+                    "content": content,
+                    "updatedAt": datetime.utcnow(),
+                },
+                merge=True,
+            )
+            return True
+        except Exception as e:
+            print(f"Failed to persist fallback content in Firestore: {e}")
+            return False
+
+    async def _get_content_firestore(self, doc_id: str) -> Optional[Dict[str, Any]]:
+        try:
+            content_doc = self._content_doc_ref(doc_id).get()
+            if not content_doc.exists:
+                return None
+            payload = content_doc.to_dict() or {}
+            content = payload.get("content")
+            return content if isinstance(content, dict) else None
+        except Exception as e:
+            print(f"Failed to read fallback content from Firestore: {e}")
+            return None
 
     async def create_document(
         self,
@@ -133,12 +166,25 @@ class DocumentService:
         return True
 
     async def save_content(self, doc_id: str, content: Dict[str, Any]) -> bool:
-        try:
-            content_json = json.dumps(content)
-            self.bucket.blob(self._primary_content_path(doc_id)).upload_from_string(
-                content_json, content_type="application/json"
-            )
+        saved = False
 
+        if self._is_storage_available():
+            try:
+                content_json = json.dumps(content)
+                self.bucket.blob(self._primary_content_path(doc_id)).upload_from_string(
+                    content_json, content_type="application/json"
+                )
+                saved = True
+            except Exception as e:
+                print(f"Failed to save content to Storage, falling back to Firestore: {e}")
+                self.bucket = None
+
+        if not saved:
+            saved = await self._save_content_firestore(doc_id, content)
+            if not saved:
+                return False
+
+        try:
             doc_ref = self.db.collection(self.collection).document(doc_id)
             doc_ref.update(
                 {
@@ -146,27 +192,32 @@ class DocumentService:
                     "version": 1,
                 }
             )
-
-            return True
         except Exception as e:
-            print(f"Failed to save content: {e}")
-            return False
+            print(f"Failed to update document metadata after content save: {e}")
+
+        return True
 
     async def get_content(self, doc_id: str) -> Optional[Dict[str, Any]]:
-        try:
-            primary_blob = self.bucket.blob(self._primary_content_path(doc_id))
+        if self._is_storage_available():
+            try:
+                primary_blob = self.bucket.blob(self._primary_content_path(doc_id))
+                content = primary_blob.download_as_text()
+                return json.loads(content)
+            except NotFound:
+                # Content not present in Storage; continue with Firestore fallback.
+                pass
+            except Exception as e:
+                print(f"Failed to get content from Storage, trying Firestore fallback: {e}")
+                self.bucket = None
 
-            if not primary_blob.exists():
-                return {
-                    "type": "doc",
-                    "content": [{"type": "paragraph", "content": []}],
-                }
+        fallback = await self._get_content_firestore(doc_id)
+        if fallback is not None:
+            return fallback
 
-            content = primary_blob.download_as_text()
-            return json.loads(content)
-        except Exception as e:
-            print(f"Failed to get content: {e}")
-            return None
+        return {
+            "type": "doc",
+            "content": [{"type": "paragraph", "content": []}],
+        }
 
     async def share_document(
         self, doc_id: str, owner_id: str, invitee_email: str, permission_level: int

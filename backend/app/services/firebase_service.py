@@ -44,12 +44,23 @@ def get_firestore_client() -> FirestoreClient:
 
 
 @lru_cache()
-def get_storage_bucket() -> Bucket:
+def get_storage_bucket() -> Optional[Bucket]:
+    project_id = get_project_id()
+    if not project_id:
+        print(
+            "Warning: GOOGLE_CLOUD_PROJECT not set. Storage features will be disabled."
+        )
+        return None
+
     app = get_firebase_app()
     bucket_name = settings.FIREBASE_STORAGE_BUCKET or os.getenv(
-        "FIREBASE_STORAGE_BUCKET", f"{get_project_id()}.appspot.com"
+        "FIREBASE_STORAGE_BUCKET", f"{project_id}.appspot.com"
     )
-    return storage.bucket(bucket_name, app=app)
+    try:
+        return storage.bucket(bucket_name, app=app)
+    except ValueError as e:
+        print(f"Failed to initialize storage bucket '{bucket_name}': {e}")
+        return None
 
 
 def verify_id_token(id_token: str) -> Optional[dict]:
